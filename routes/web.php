@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         'edit' => 'admin.kategori.edit',
         'update' => 'admin.kategori.update',
         'destroy' => 'admin.kategori.destroy',
+    ]);
+
+    Route::resource('buku', BukuController::class)->names([
+        'index' => 'admin.buku.index',
+        'create' => 'admin.buku.create',
+        'store' => 'admin.buku.store',
+        'edit' => 'admin.buku.edit',
+        'update' => 'admin.buku.update',
+        'destroy' => 'admin.buku.destroy',
     ]);
 });
 
