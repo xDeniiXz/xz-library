@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\AnggotaController;
 use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\TransaksiController;
+use App\Http\Controllers\Student\PeminjamanController as StudentPeminjamanController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -26,6 +27,13 @@ Route::middleware(['auth', 'role:student'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard');
+
+    Route::prefix('peminjaman')->group(function () {
+        Route::get('/', [StudentPeminjamanController::class, 'index'])->name('student.peminjaman.index');
+        Route::get('/katalog', [StudentPeminjamanController::class, 'katalog'])->name('student.peminjaman.katalog');
+        Route::post('/store', [StudentPeminjamanController::class, 'store'])->name('student.peminjaman.store');
+        Route::post('/{peminjaman}/kembalikan', [StudentPeminjamanController::class, 'kembalikan'])->name('student.peminjaman.kembalikan');
+    });
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {

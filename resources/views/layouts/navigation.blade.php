@@ -14,11 +14,29 @@
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     @if(Auth::user()->isAdmin())
                     <x-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                        {{ __('Dashboard Admin') }}
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.kategori.index')" :active="request()->routeIs('admin.kategori.*')">
+                        {{ __('Kategori') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.buku.index')" :active="request()->routeIs('admin.buku.*')">
+                        {{ __('Buku') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.anggota.index')" :active="request()->routeIs('admin.anggota.*')">
+                        {{ __('Anggota') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('admin.transaksi.index')" :active="request()->routeIs('admin.transaksi.*')">
+                        {{ __('Transaksi') }}
                     </x-nav-link>
                     @else
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard Siswa') }}
+                        {{ __('Dashboard') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('student.peminjaman.katalog')" :active="request()->routeIs('student.peminjaman.katalog')">
+                        {{ __('Katalog Buku') }}
+                    </x-nav-link>
+                    <x-nav-link :href="route('student.peminjaman.index')" :active="request()->routeIs('student.peminjaman.index')">
+                        {{ __('Riwayat Pinjam') }}
                     </x-nav-link>
                     @endif
                 </div>
@@ -75,11 +93,29 @@
         <div class="pt-2 pb-3 space-y-1">
             @if(Auth::user()->isAdmin())
             <x-responsive-nav-link :href="route('admin.dashboard')" :active="request()->routeIs('admin.dashboard')">
-                {{ __('Dashboard Admin') }}
+                {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.kategori.index')" :active="request()->routeIs('admin.kategori.*')">
+                {{ __('Kategori') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.buku.index')" :active="request()->routeIs('admin.buku.*')">
+                {{ __('Buku') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.anggota.index')" :active="request()->routeIs('admin.anggota.*')">
+                {{ __('Anggota') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('admin.transaksi.index')" :active="request()->routeIs('admin.transaksi.*')">
+                {{ __('Transaksi') }}
             </x-responsive-nav-link>
             @else
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard Siswa') }}
+                {{ __('Dashboard') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('student.peminjaman.katalog')" :active="request()->routeIs('student.peminjaman.katalog')">
+                {{ __('Katalog Buku') }}
+            </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('student.peminjaman.index')" :active="request()->routeIs('student.peminjaman.index')">
+                {{ __('Riwayat Pinjam') }}
             </x-responsive-nav-link>
             @endif
         </div>

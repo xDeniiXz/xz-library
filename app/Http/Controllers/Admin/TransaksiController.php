@@ -14,7 +14,7 @@ class TransaksiController extends Controller
 {
     public function index()
     {
-        $transaksi = Peminjaman::with(['user', 'buku', 'pengembalian'])->latest()->get();
+        $transaksi = Peminjaman::with(['user', 'buku', 'pengembalian'])->orderBy('id', 'asc')->get();
         return view('admin.transaksi.index', compact('transaksi'));
     }
 

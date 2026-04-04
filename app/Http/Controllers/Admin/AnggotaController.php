@@ -15,7 +15,7 @@ class AnggotaController extends Controller
      */
     public function index()
     {
-        $anggota = User::where('role', 'student')->get();
+        $anggota = User::where('role', 'student')->orderBy('id', 'asc')->get();
         return view('admin.anggota.index', compact('anggota'));
     }
 
@@ -110,7 +110,7 @@ class AnggotaController extends Controller
         if ($anggota->role !== 'student') {
             abort(403);
         }
-        
+
         $anggota->delete();
 
         return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil dihapus.');
