@@ -1,7 +1,9 @@
 <?php
 
+use App\Http\Controllers\Admin\AnggotaController;
 use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\KategoriController;
+use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -48,6 +50,23 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         'update' => 'admin.buku.update',
         'destroy' => 'admin.buku.destroy',
     ]);
+
+    Route::resource('anggota', AnggotaController::class)->parameters([
+        'anggota' => 'anggota'
+    ])->names([
+        'index' => 'admin.anggota.index',
+        'create' => 'admin.anggota.create',
+        'store' => 'admin.anggota.store',
+        'edit' => 'admin.anggota.edit',
+        'update' => 'admin.anggota.update',
+        'destroy' => 'admin.anggota.destroy',
+    ]);
+
+    Route::get('transaksi', [TransaksiController::class, 'index'])->name('admin.transaksi.index');
+    Route::get('transaksi/create', [TransaksiController::class, 'create'])->name('admin.transaksi.create');
+    Route::post('transaksi', [TransaksiController::class, 'store'])->name('admin.transaksi.store');
+    Route::post('transaksi/{peminjaman}/kembalikan', [TransaksiController::class, 'kembalikan'])->name('admin.transaksi.kembalikan');
+    Route::delete('transaksi/{peminjaman}', [TransaksiController::class, 'destroy'])->name('admin.transaksi.destroy');
 });
 
 Route::middleware('auth')->group(function () {
