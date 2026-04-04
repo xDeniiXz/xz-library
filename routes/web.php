@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,6 +29,15 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return view('admin.dashboard');
     })->name('admin.dashboard');
+
+    Route::resource('kategori', KategoriController::class)->names([
+        'index' => 'admin.kategori.index',
+        'create' => 'admin.kategori.create',
+        'store' => 'admin.kategori.store',
+        'edit' => 'admin.kategori.edit',
+        'update' => 'admin.kategori.update',
+        'destroy' => 'admin.kategori.destroy',
+    ]);
 });
 
 Route::middleware('auth')->group(function () {
@@ -36,4 +46,4 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
-require __DIR__.'/auth.php';
+require __DIR__ . '/auth.php';
