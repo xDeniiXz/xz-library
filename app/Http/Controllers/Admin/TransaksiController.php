@@ -12,9 +12,43 @@ use Carbon\Carbon;
 
 class TransaksiController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $transaksi = Peminjaman::with(['user', 'buku', 'pengembalian'])->orderBy('id', 'asc')->get();
+        $query = Peminjaman::with(['user', 'buku', 'pengembalian']);
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $criteria = $request->get('criteria', 'semua');
+
+            $query->where(function ($q) use ($search, $criteria) {
+                if ($criteria === 'peminjam') {
+                    $q->whereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%$search%");
+                    });
+                } elseif ($criteria === 'username') {
+                    $q->whereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('username', 'like', "%$search%");
+                    });
+                } elseif ($criteria === 'buku') {
+                    $q->whereHas('buku', function ($bookQuery) use ($search) {
+                        $bookQuery->where('judul', 'like', "%$search%");
+                    });
+                } else {
+                    $q->whereHas('user', function ($userQuery) use ($search) {
+                        $userQuery->where('name', 'like', "%$search%")
+                            ->orWhere('username', 'like', "%$search%");
+                    })->orWhereHas('buku', function ($bookQuery) use ($search) {
+                        $bookQuery->where('judul', 'like', "%$search%");
+                    });
+                }
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+
+        $transaksi = $query->orderBy('tanggal_pinjam', 'desc')->get();
         return view('admin.transaksi.index', compact('transaksi'));
     }
 

@@ -24,6 +24,52 @@
             </script>
             @endif
 
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8 transition-all duration-300">
+                <form action="{{ route('admin.kategori.index') }}" method="GET" class="flex flex-col md:flex-row items-end gap-4">
+                    <div class="w-full md:w-48">
+                        <x-input-label for="criteria" :value="__('Cari Berdasarkan')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
+                        <select name="criteria" id="criteria" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                            <option value="nama_kategori" selected>Nama Kategori</option>
+                        </select>
+                    </div>
+
+                    <div class="flex-1 w-full group">
+                        <x-input-label for="search" :value="__('Kata Kunci')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Cari nama kategori..." class="block w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                        </div>
+                    </div>
+
+                    <div class="w-full md:w-56">
+                        <x-input-label for="filter_buku" :value="__('Status Buku')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
+                        <select name="filter_buku" id="filter_buku" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                            <option value="">Semua Kategori</option>
+                            <option value="memiliki_buku" {{ request('filter_buku') == 'memiliki_buku' ? 'selected' : '' }}>Sudah Ada Buku</option>
+                            <option value="tanpa_buku" {{ request('filter_buku') == 'tanpa_buku' ? 'selected' : '' }}>Belum Ada Buku</option>
+                        </select>
+                    </div>
+
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button type="submit" class="flex-1 md:flex-none px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/30 flex items-center justify-center">
+                            Cari
+                        </button>
+
+                        @if(request()->anyFilled(['search', 'filter_buku']))
+                        <a href="{{ route('admin.kategori.index') }}" class="px-3 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg shadow-rose-500/20" title="Reset Filter">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border-2 border-indigo-500/20">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
@@ -43,7 +89,8 @@
                             <thead class="bg-gray-100 dark:bg-gray-700/50">
                                 <tr>
                                     <th class="px-6 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700 w-20">No</th>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Nama Kategori</th>
+                                    <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700">Nama Kategori</th>
+                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider">Total Buku</th>
                                     <th class="px-6 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-l-2 border-gray-200 dark:border-gray-700 w-64">Aksi</th>
                                 </tr>
                             </thead>
@@ -51,7 +98,12 @@
                                 @forelse($kategori as $item)
                                 <tr class="hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-200">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-indigo-600 dark:text-indigo-400 border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">{{ $loop->iteration }}</td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">{{ $item->nama_kategori }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm font-medium border-r-2 border-gray-200 dark:border-gray-700">{{ $item->nama_kategori }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                        <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 rounded-full text-xs font-bold uppercase tracking-wider">
+                                            {{ $item->buku_count }} Buku
+                                        </span>
+                                    </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center border-l-2 border-gray-200 dark:border-gray-700">
                                         <div class="flex justify-center items-center gap-4">
                                             <a href="{{ route('admin.kategori.edit', $item->id) }}" class="inline-flex items-center px-4 py-2 bg-amber-500 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-300 shadow-md shadow-amber-500/20">
@@ -79,7 +131,7 @@
                                 </tr>
                                 @empty
                                 <tr>
-                                    <td colspan="3" class="px-6 py-16 text-center">
+                                    <td colspan="4" class="px-6 py-16 text-center">
                                         <div class="flex flex-col items-center justify-center space-y-4">
                                             <div class="bg-gray-100 dark:bg-gray-700 p-4 rounded-full">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">

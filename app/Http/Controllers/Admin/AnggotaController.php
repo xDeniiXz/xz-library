@@ -13,9 +13,52 @@ class AnggotaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $anggota = User::where('role', 'student')->orderBy('id', 'asc')->get();
+        $query = User::where('role', 'student');
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $criteria = $request->get('criteria', 'semua');
+
+            $query->where(function ($q) use ($search, $criteria) {
+                if ($criteria === 'name') {
+                    $q->where('name', 'like', "%$search%");
+                } elseif ($criteria === 'username') {
+                    $q->where('username', 'like', "%$search%");
+                } elseif ($criteria === 'email') {
+                    $q->where('email', 'like', "%$search%");
+                } elseif ($criteria === 'phone_number') {
+                    $q->where('phone_number', 'like', "%$search%");
+                } elseif ($criteria === 'address') {
+                    $q->where('address', 'like', "%$search%");
+                } else {
+                    $q->where('name', 'like', "%$search%")
+                        ->orWhere('username', 'like', "%$search%")
+                        ->orWhere('email', 'like', "%$search%")
+                        ->orWhere('phone_number', 'like', "%$search%")
+                        ->orWhere('address', 'like', "%$search%");
+                }
+            });
+        }
+
+        if ($request->filled('profil')) {
+            if ($request->get('profil') === 'lengkap') {
+                $query->whereNotNull('phone_number')
+                    ->where('phone_number', '!=', '')
+                    ->whereNotNull('address')
+                    ->where('address', '!=', '');
+            } elseif ($request->get('profil') === 'belum_lengkap') {
+                $query->where(function ($q) {
+                    $q->whereNull('phone_number')
+                        ->orWhere('phone_number', '')
+                        ->orWhereNull('address')
+                        ->orWhere('address', '');
+                });
+            }
+        }
+
+        $anggota = $query->orderBy('name', 'asc')->get();
         return view('admin.anggota.index', compact('anggota'));
     }
 

@@ -24,6 +24,69 @@
             </script>
             @endif
 
+            <div class="bg-white dark:bg-gray-800 p-6 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 mb-8 transition-all duration-300">
+                <form action="{{ route('admin.buku.index') }}" method="GET" class="flex flex-col md:flex-row items-end gap-4">
+                    <div class="w-full md:w-48">
+                        <x-input-label for="criteria" :value="__('Cari Berdasarkan')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
+                        <select name="criteria" id="criteria" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                            <option value="semua" {{ request('criteria') == 'semua' ? 'selected' : '' }}>Semua</option>
+                            <option value="judul" {{ request('criteria') == 'judul' ? 'selected' : '' }}>Judul</option>
+                            <option value="penulis" {{ request('criteria') == 'penulis' ? 'selected' : '' }}>Penulis</option>
+                            <option value="penerbit" {{ request('criteria') == 'penerbit' ? 'selected' : '' }}>Penerbit</option>
+                            <option value="isbn" {{ request('criteria') == 'isbn' ? 'selected' : '' }}>ISBN</option>
+                            <option value="tahun_terbit" {{ request('criteria') == 'tahun_terbit' ? 'selected' : '' }}>Tahun Terbit</option>
+                        </select>
+                    </div>
+
+                    <div class="flex-1 w-full group">
+                        <x-input-label for="search" :value="__('Kata Kunci')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
+                        <div class="relative">
+                            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                <svg class="h-5 w-5 text-gray-400 group-focus-within:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Ketik kata kunci pencarian..." class="block w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                        </div>
+                    </div>
+
+                    <div class="w-full md:w-56">
+                        <x-input-label for="kategori_id" :value="__('Kategori')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
+                        <select name="kategori_id" id="kategori_id" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                            <option value="">Semua Kategori</option>
+                            @foreach($kategori as $kat)
+                            <option value="{{ $kat->id }}" {{ request('kategori_id') == $kat->id ? 'selected' : '' }}>
+                                {{ $kat->nama_kategori }}
+                            </option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div class="w-full md:w-48">
+                        <x-input-label for="stok" :value="__('Status Stok')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
+                        <select name="stok" id="stok" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                            <option value="">Semua Stok</option>
+                            <option value="tersedia" {{ request('stok') == 'tersedia' ? 'selected' : '' }}>Tersedia</option>
+                            <option value="habis" {{ request('stok') == 'habis' ? 'selected' : '' }}>Habis</option>
+                        </select>
+                    </div>
+
+                    <div class="flex gap-2 w-full md:w-auto">
+                        <button type="submit" class="flex-1 md:flex-none px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/30 flex items-center justify-center">
+                            Cari
+                        </button>
+
+                        @if(request()->anyFilled(['search', 'kategori_id', 'criteria', 'stok']))
+                        <a href="{{ route('admin.buku.index') }}" class="px-3 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg shadow-rose-500/20" title="Reset Filter">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border-2 border-indigo-500/20">
                 <div class="p-6 text-gray-900 dark:text-gray-100">
                     <div class="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">

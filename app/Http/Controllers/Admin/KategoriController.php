@@ -11,9 +11,25 @@ class KategoriController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $kategori = Kategori::orderBy('id', 'asc')->get();
+        $query = Kategori::withCount('buku');
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+
+            $query->where('nama_kategori', 'like', "%$search%");
+        }
+
+        if ($request->filled('filter_buku')) {
+            if ($request->get('filter_buku') === 'memiliki_buku') {
+                $query->has('buku');
+            } elseif ($request->get('filter_buku') === 'tanpa_buku') {
+                $query->doesntHave('buku');
+            }
+        }
+
+        $kategori = $query->orderBy('nama_kategori', 'asc')->get();
         return view('admin.kategori.index', compact('kategori'));
     }
 

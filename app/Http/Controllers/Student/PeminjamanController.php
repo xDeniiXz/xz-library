@@ -12,12 +12,38 @@ use Illuminate\Support\Facades\Auth;
 
 class PeminjamanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $peminjaman = Peminjaman::with(['buku', 'pengembalian'])
-            ->where('user_id', Auth::id())
-            ->orderBy('id', 'asc')
-            ->get();
+        $query = Peminjaman::with(['buku', 'pengembalian'])
+            ->where('user_id', Auth::id());
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $criteria = $request->get('criteria', 'semua');
+
+            $query->whereHas('buku', function ($q) use ($search, $criteria) {
+                if ($criteria === 'judul') {
+                    $q->where('judul', 'like', "%$search%");
+                } elseif ($criteria === 'penulis') {
+                    $q->where('penulis', 'like', "%$search%");
+                } elseif ($criteria === 'penerbit') {
+                    $q->where('penerbit', 'like', "%$search%");
+                } elseif ($criteria === 'tahun_terbit') {
+                    $q->where('tahun_terbit', $search);
+                } else {
+                    $q->where('judul', 'like', "%$search%")
+                        ->orWhere('penulis', 'like', "%$search%")
+                        ->orWhere('penerbit', 'like', "%$search%")
+                        ->orWhere('isbn', 'like', "%$search%");
+                }
+            });
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->get('status'));
+        }
+
+        $peminjaman = $query->orderBy('tanggal_pinjam', 'desc')->get();
         return view('student.peminjaman.index', compact('peminjaman'));
     }
 

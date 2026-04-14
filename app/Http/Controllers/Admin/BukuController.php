@@ -12,10 +12,50 @@ class BukuController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $buku = Buku::with('kategori')->orderBy('id', 'asc')->get();
-        return view('admin.buku.index', compact('buku'));
+        $query = Buku::with('kategori');
+
+        if ($request->filled('search')) {
+            $search = $request->get('search');
+            $criteria = $request->get('criteria', 'semua');
+
+            $query->where(function ($q) use ($search, $criteria) {
+                if ($criteria === 'judul') {
+                    $q->where('judul', 'like', "%$search%");
+                } elseif ($criteria === 'penulis') {
+                    $q->where('penulis', 'like', "%$search%");
+                } elseif ($criteria === 'penerbit') {
+                    $q->where('penerbit', 'like', "%$search%");
+                } elseif ($criteria === 'isbn') {
+                    $q->where('isbn', 'like', "%$search%");
+                } elseif ($criteria === 'tahun_terbit') {
+                    $q->where('tahun_terbit', $search);
+                } else {
+                    $q->where('judul', 'like', "%$search%")
+                        ->orWhere('penulis', 'like', "%$search%")
+                        ->orWhere('penerbit', 'like', "%$search%")
+                        ->orWhere('isbn', 'like', "%$search%");
+                }
+            });
+        }
+
+        if ($request->filled('kategori_id')) {
+            $query->where('kategori_id', $request->get('kategori_id'));
+        }
+
+        if ($request->filled('stok')) {
+            if ($request->get('stok') === 'tersedia') {
+                $query->where('stok', '>', 0);
+            } elseif ($request->get('stok') === 'habis') {
+                $query->where('stok', '<=', 0);
+            }
+        }
+
+        $buku = $query->orderBy('judul', 'asc')->get();
+        $kategori = Kategori::orderBy('nama_kategori', 'asc')->get();
+
+        return view('admin.buku.index', compact('buku', 'kategori'));
     }
 
     /**
