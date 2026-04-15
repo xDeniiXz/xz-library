@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\BukuController;
 use App\Http\Controllers\Admin\KategoriController;
 use App\Http\Controllers\Admin\TransaksiController;
 use App\Http\Controllers\Student\PeminjamanController as StudentPeminjamanController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -24,9 +25,7 @@ Route::get('/', function () {
 });
 
 Route::middleware(['auth', 'role:student'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     Route::prefix('peminjaman')->group(function () {
         Route::get('/', [StudentPeminjamanController::class, 'index'])->name('student.peminjaman.index');
@@ -37,9 +36,7 @@ Route::middleware(['auth', 'role:student'])->group(function () {
 });
 
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return view('admin.dashboard');
-    })->name('admin.dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::resource('kategori', KategoriController::class)->names([
         'index' => 'admin.kategori.index',
