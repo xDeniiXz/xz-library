@@ -29,7 +29,8 @@
                     <div class="w-full md:w-48">
                         <x-input-label for="criteria" :value="__('Cari Berdasarkan')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
                         <select name="criteria" id="criteria" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
-                            <option value="nama_kategori" selected>Nama Kategori</option>
+                            <option value="id" {{ request('criteria') == 'id' ? 'selected' : '' }}>ID</option>
+                            <option value="nama_kategori" {{ request('criteria') == 'nama_kategori' ? 'selected' : '' }}>Nama Kategori</option>
                         </select>
                     </div>
 
@@ -41,7 +42,7 @@
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                                 </svg>
                             </div>
-                            <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Cari nama kategori..." class="block w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                            <input type="text" name="search" id="search" value="{{ request('search') }}" placeholder="Ketik kata kunci pencarian..." class="block w-full pl-10 pr-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
                         </div>
                     </div>
 
@@ -54,12 +55,20 @@
                         </select>
                     </div>
 
+                    <div class="w-full md:w-40">
+                        <x-input-label for="sort" :value="__('Urutan')" id="sort-label" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
+                        <select name="sort" id="sort" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                            <option value="asc" {{ request('sort', 'asc') == 'asc' ? 'selected' : '' }}>Terkecil (ASC)</option>
+                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Terbesar (DESC)</option>
+                        </select>
+                    </div>
+
                     <div class="flex gap-2 w-full md:w-auto">
                         <button type="submit" class="flex-1 md:flex-none px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/30 flex items-center justify-center">
                             Cari
                         </button>
 
-                        @if(request()->anyFilled(['search', 'filter_buku']))
+                        @if(request()->anyFilled(['search', 'filter_buku', 'sort', 'criteria']))
                         <a href="{{ route('admin.kategori.index') }}" class="px-3 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg shadow-rose-500/20" title="Reset Filter">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -166,6 +175,20 @@
     </div>
 
     <script>
+        // Sort label dynamic logic
+        const criteriaSelect = document.getElementById('criteria');
+        const sortLabel = document.getElementById('sort-label');
+
+        function updateSortLabel() {
+            const selectedText = criteriaSelect.options[criteriaSelect.selectedIndex].text;
+            sortLabel.textContent = `Urutan ${selectedText}`;
+        }
+
+        if (criteriaSelect && sortLabel) {
+            criteriaSelect.addEventListener('change', updateSortLabel);
+            updateSortLabel(); // Initial call
+        }
+
         // Checkbox logic
         const selectAll = document.getElementById('select-all');
         const checkboxes = document.querySelectorAll('.category-checkbox');

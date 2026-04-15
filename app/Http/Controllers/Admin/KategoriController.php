@@ -29,7 +29,11 @@ class KategoriController extends Controller
             }
         }
 
-        $kategori = $query->orderBy('nama_kategori', 'asc')->get();
+        $sort = $request->get('sort', 'asc') === 'desc' ? 'desc' : 'asc';
+        $criteria = $request->get('criteria', 'id');
+        $sortColumn = in_array($criteria, ['nama_kategori', 'id']) ? $criteria : 'id';
+
+        $kategori = $query->orderBy($sortColumn, $sort)->get();
         return view('admin.kategori.index', compact('kategori'));
     }
 

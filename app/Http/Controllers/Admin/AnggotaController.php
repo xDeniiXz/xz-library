@@ -58,7 +58,12 @@ class AnggotaController extends Controller
             }
         }
 
-        $anggota = $query->orderBy('name', 'asc')->get();
+        $sort = $request->get('sort', 'asc') === 'desc' ? 'desc' : 'asc';
+        $criteria = $request->get('criteria', 'id');
+        $allowedSortColumns = ['name', 'username', 'email', 'phone_number', 'address', 'id'];
+        $sortColumn = in_array($criteria, $allowedSortColumns) ? $criteria : 'id';
+
+        $anggota = $query->orderBy($sortColumn, $sort)->get();
         return view('admin.anggota.index', compact('anggota'));
     }
 

@@ -43,7 +43,20 @@ class PeminjamanController extends Controller
             $query->where('status', $request->get('status'));
         }
 
-        $peminjaman = $query->orderBy('tanggal_pinjam', 'asc')->get();
+        $sort = $request->get('sort', 'asc') === 'desc' ? 'desc' : 'asc';
+        $criteria = $request->get('criteria', 'id');
+
+        $allowedBukuSort = ['judul', 'penulis', 'penerbit', 'tahun_terbit'];
+
+        if (in_array($criteria, $allowedBukuSort)) {
+            $query->select('peminjaman.*')
+                ->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
+                ->orderBy('buku.' . $criteria, $sort);
+        } else {
+            $query->orderBy('peminjaman.id', $sort);
+        }
+
+        $peminjaman = $query->get();
         return view('student.peminjaman.index', compact('peminjaman'));
     }
 

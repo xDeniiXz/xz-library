@@ -52,7 +52,12 @@ class BukuController extends Controller
             }
         }
 
-        $buku = $query->orderBy('judul', 'asc')->get();
+        $sort = $request->get('sort', 'asc') === 'desc' ? 'desc' : 'asc';
+        $criteria = $request->get('criteria', 'id');
+        $allowedSortColumns = ['judul', 'penulis', 'penerbit', 'isbn', 'tahun_terbit', 'id'];
+        $sortColumn = in_array($criteria, $allowedSortColumns) ? $criteria : 'id';
+
+        $buku = $query->orderBy($sortColumn, $sort)->get();
         $kategori = Kategori::orderBy('nama_kategori', 'asc')->get();
 
         return view('admin.buku.index', compact('buku', 'kategori'));

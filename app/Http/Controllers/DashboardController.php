@@ -37,7 +37,7 @@ class DashboardController extends Controller
         ];
 
         $transaksi_terbaru = Peminjaman::with(['user', 'buku'])
-            ->latest()
+            ->orderBy('id', 'asc')
             ->take(5)
             ->get();
 
@@ -67,7 +67,7 @@ class DashboardController extends Controller
 
         $riwayat_terbaru = Peminjaman::with(['buku', 'pengembalian'])
             ->where('user_id', $user_id)
-            ->latest()
+            ->orderBy('id', 'asc')
             ->take(5)
             ->get();
 

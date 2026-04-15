@@ -48,7 +48,27 @@ class TransaksiController extends Controller
             $query->where('status', $request->get('status'));
         }
 
-        $transaksi = $query->orderBy('tanggal_pinjam', 'asc')->get();
+        $sort = $request->get('sort', 'asc') === 'desc' ? 'desc' : 'asc';
+        $criteria = $request->get('criteria', 'id');
+
+        // Sorting logic for relations
+        if ($criteria === 'peminjam') {
+            $query->select('peminjaman.*')
+                ->join('users', 'peminjaman.user_id', '=', 'users.id')
+                ->orderBy('users.name', $sort);
+        } elseif ($criteria === 'username') {
+            $query->select('peminjaman.*')
+                ->join('users', 'peminjaman.user_id', '=', 'users.id')
+                ->orderBy('users.username', $sort);
+        } elseif ($criteria === 'buku') {
+            $query->select('peminjaman.*')
+                ->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
+                ->orderBy('buku.judul', $sort);
+        } else {
+            $query->orderBy('peminjaman.id', $sort);
+        }
+
+        $transaksi = $query->get();
         return view('admin.transaksi.index', compact('transaksi'));
     }
 
