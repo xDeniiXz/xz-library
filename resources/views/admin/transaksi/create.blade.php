@@ -12,11 +12,11 @@
                     <form action="{{ route('admin.transaksi.store') }}" method="POST">
                         @csrf
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                            <!-- Pilih Anggota -->
+                            <!-- Pilih Siswa -->
                             <div>
-                                <x-input-label for="user_id" :value="__('Pilih Anggota (Siswa)')" class="font-bold mb-2" />
+                                <x-input-label for="user_id" :value="__('Pilih Siswa')" class="font-bold mb-2" />
                                 <select id="user_id" name="user_id" class="block mt-1 w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 rounded-xl transition-all text-gray-700 dark:text-gray-300">
-                                    <option value="" disabled selected>Cari Nama Anggota...</option>
+                                    <option value="" disabled selected>Cari Nama Siswa...</option>
                                     @foreach($anggota as $item)
                                         <option value="{{ $item->id }}" {{ old('user_id') == $item->id ? 'selected' : '' }}>
                                             {{ $item->name }} (@ {{ $item->username }})

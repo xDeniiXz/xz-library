@@ -86,4 +86,16 @@ class KategoriController extends Controller
 
         return redirect()->route('admin.kategori.index')->with('success', 'Kategori berhasil dihapus.');
     }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada data yang dipilih.']);
+        }
+
+        Kategori::whereIn('id', $ids)->delete();
+
+        return response()->json(['success' => true, 'message' => 'Kategori yang dipilih berhasil dihapus.']);
+    }
 }

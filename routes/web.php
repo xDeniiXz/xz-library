@@ -38,6 +38,7 @@ Route::middleware(['auth', 'role:student'])->group(function () {
 Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
+    Route::delete('kategori/bulk-delete', [KategoriController::class, 'bulkDelete'])->name('admin.kategori.bulkDelete');
     Route::resource('kategori', KategoriController::class)->names([
         'index' => 'admin.kategori.index',
         'create' => 'admin.kategori.create',
@@ -47,6 +48,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         'destroy' => 'admin.kategori.destroy',
     ]);
 
+    Route::delete('buku/bulk-delete', [BukuController::class, 'bulkDelete'])->name('admin.buku.bulkDelete');
     Route::resource('buku', BukuController::class)->names([
         'index' => 'admin.buku.index',
         'create' => 'admin.buku.create',
@@ -56,6 +58,7 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         'destroy' => 'admin.buku.destroy',
     ]);
 
+    Route::delete('anggota/bulk-delete', [AnggotaController::class, 'bulkDelete'])->name('admin.anggota.bulkDelete');
     Route::resource('anggota', AnggotaController::class)->parameters([
         'anggota' => 'anggota'
     ])->names([
@@ -67,9 +70,12 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         'destroy' => 'admin.anggota.destroy',
     ]);
 
+    Route::delete('transaksi/bulk-delete', [TransaksiController::class, 'bulkDelete'])->name('admin.transaksi.bulkDelete');
     Route::get('transaksi', [TransaksiController::class, 'index'])->name('admin.transaksi.index');
     Route::get('transaksi/create', [TransaksiController::class, 'create'])->name('admin.transaksi.create');
     Route::post('transaksi', [TransaksiController::class, 'store'])->name('admin.transaksi.store');
+    Route::post('transaksi/{peminjaman}/approve', [TransaksiController::class, 'approve'])->name('admin.transaksi.approve');
+    Route::post('transaksi/{peminjaman}/reject', [TransaksiController::class, 'reject'])->name('admin.transaksi.reject');
     Route::post('transaksi/{peminjaman}/kembalikan', [TransaksiController::class, 'kembalikan'])->name('admin.transaksi.kembalikan');
     Route::delete('transaksi/{peminjaman}', [TransaksiController::class, 'destroy'])->name('admin.transaksi.destroy');
 });

@@ -73,13 +73,16 @@ class BukuController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'judul' => 'required|string|max:255',
+            'judul' => 'required|string|max:255|unique:buku,judul',
             'penulis' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
             'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
             'isbn' => 'required|string|max:20|unique:buku,isbn',
             'stok' => 'required|integer|min:0',
             'kategori_id' => 'required|exists:kategori,id',
+        ], [
+            'judul.unique' => 'Judul buku sudah terdaftar dalam sistem.',
+            'isbn.unique' => 'ISBN buku sudah terdaftar dalam sistem.',
         ]);
 
         Buku::create($request->all());
@@ -102,13 +105,16 @@ class BukuController extends Controller
     public function update(Request $request, Buku $buku)
     {
         $request->validate([
-            'judul' => 'required|string|max:255',
+            'judul' => 'required|string|max:255|unique:buku,judul,' . $buku->id,
             'penulis' => 'required|string|max:255',
             'penerbit' => 'required|string|max:255',
             'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
             'isbn' => 'required|string|max:20|unique:buku,isbn,' . $buku->id,
             'stok' => 'required|integer|min:0',
             'kategori_id' => 'required|exists:kategori,id',
+        ], [
+            'judul.unique' => 'Judul buku sudah terdaftar dalam sistem.',
+            'isbn.unique' => 'ISBN buku sudah terdaftar dalam sistem.',
         ]);
 
         $buku->update($request->all());
@@ -124,5 +130,17 @@ class BukuController extends Controller
         $buku->delete();
 
         return redirect()->route('admin.buku.index')->with('success', 'Buku berhasil dihapus.');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada data yang dipilih.']);
+        }
+
+        Buku::whereIn('id', $ids)->delete();
+
+        return response()->json(['success' => true, 'message' => 'Buku yang dipilih berhasil dihapus.']);
     }
 }

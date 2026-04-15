@@ -48,7 +48,7 @@ class TransaksiController extends Controller
             $query->where('status', $request->get('status'));
         }
 
-        $transaksi = $query->orderBy('tanggal_pinjam', 'desc')->get();
+        $transaksi = $query->orderBy('tanggal_pinjam', 'asc')->get();
         return view('admin.transaksi.index', compact('transaksi'));
     }
 
@@ -88,6 +88,34 @@ class TransaksiController extends Controller
         return redirect()->route('admin.transaksi.index')->with('success', 'Peminjaman berhasil dicatat.');
     }
 
+    public function approve(Peminjaman $peminjaman)
+    {
+        if ($peminjaman->status !== 'menunggu') {
+            return back()->with('error', 'Transaksi ini tidak dapat disetujui.');
+        }
+
+        // Cek stok buku lagi sebelum menyetujui
+        if ($peminjaman->buku->stok <= 0) {
+            return back()->with('error', 'Stok buku habis. Permintaan tidak dapat disetujui.');
+        }
+
+        $peminjaman->update(['status' => 'dipinjam']);
+        $peminjaman->buku->decrement('stok');
+
+        return back()->with('success', 'Permintaan peminjaman berhasil disetujui.');
+    }
+
+    public function reject(Peminjaman $peminjaman)
+    {
+        if ($peminjaman->status !== 'menunggu') {
+            return back()->with('error', 'Transaksi ini tidak dapat ditolak.');
+        }
+
+        $peminjaman->update(['status' => 'ditolak']);
+
+        return back()->with('success', 'Permintaan peminjaman telah ditolak.');
+    }
+
     public function kembalikan(Request $request, Peminjaman $peminjaman)
     {
         if ($peminjaman->status === 'dikembalikan') {
@@ -102,10 +130,10 @@ class TransaksiController extends Controller
         $due_date = Carbon::parse($peminjaman->tanggal_kembali);
         $denda = 0;
 
-        // Hitung denda jika terlambat (misal 1000 per hari)
+        // Hitung denda jika terlambat (10.000 per hari)
         if ($tanggal_pengembalian->gt($due_date)) {
             $days = $tanggal_pengembalian->diffInDays($due_date);
-            $denda = $days * 1000;
+            $denda = $days * 10000;
         }
 
         Pengembalian::create([
@@ -136,5 +164,23 @@ class TransaksiController extends Controller
 
         $peminjaman->delete();
         return redirect()->route('admin.transaksi.index')->with('success', 'Data transaksi berhasil dihapus.');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada data yang dipilih.']);
+        }
+
+        $peminjamans = Peminjaman::whereIn('id', $ids)->get();
+        foreach ($peminjamans as $peminjaman) {
+            if ($peminjaman->status === 'dipinjam') {
+                $peminjaman->buku->increment('stok');
+            }
+            $peminjaman->delete();
+        }
+
+        return response()->json(['success' => true, 'message' => 'Transaksi yang dipilih berhasil dihapus.']);
     }
 }

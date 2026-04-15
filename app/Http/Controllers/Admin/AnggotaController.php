@@ -94,7 +94,7 @@ class AnggotaController extends Controller
             'role' => 'student',
         ]);
 
-        return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil ditambahkan.');
+        return redirect()->route('admin.anggota.index')->with('success', 'Siswa berhasil ditambahkan.');
     }
 
     /**
@@ -103,7 +103,7 @@ class AnggotaController extends Controller
     public function edit(User $anggota)
     {
         if ($anggota->role !== 'student') {
-            abort(403, 'Anda hanya dapat mengedit data anggota (siswa).');
+            abort(403, 'Anda hanya dapat mengedit data siswa.');
         }
         return view('admin.anggota.edit', compact('anggota'));
     }
@@ -142,7 +142,7 @@ class AnggotaController extends Controller
 
         $anggota->update($data);
 
-        return redirect()->route('admin.anggota.index')->with('success', 'Data anggota berhasil diperbarui.');
+        return redirect()->route('admin.anggota.index')->with('success', 'Data siswa berhasil diperbarui.');
     }
 
     /**
@@ -156,6 +156,18 @@ class AnggotaController extends Controller
 
         $anggota->delete();
 
-        return redirect()->route('admin.anggota.index')->with('success', 'Anggota berhasil dihapus.');
+        return redirect()->route('admin.anggota.index')->with('success', 'Siswa berhasil dihapus.');
+    }
+
+    public function bulkDelete(Request $request)
+    {
+        $ids = $request->ids;
+        if (!$ids) {
+            return response()->json(['success' => false, 'message' => 'Tidak ada data yang dipilih.']);
+        }
+
+        User::whereIn('id', $ids)->where('role', 'student')->delete();
+
+        return response()->json(['success' => true, 'message' => 'Siswa yang dipilih berhasil dihapus.']);
     }
 }

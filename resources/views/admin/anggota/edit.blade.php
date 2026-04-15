@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight text-center sm:text-left">
-            {{ __('Edit Data Anggota') }}
+            {{ __('Edit Data Siswa') }}
         </h2>
     </x-slot>
 
@@ -74,7 +74,7 @@
                                 Batal
                             </a>
                             <x-primary-button class="bg-indigo-600 hover:bg-indigo-700 shadow-lg shadow-indigo-500/30 px-6 py-2 rounded-lg">
-                                Perbarui Anggota
+                                Perbarui Siswa
                             </x-primary-button>
                         </div>
                     </form>

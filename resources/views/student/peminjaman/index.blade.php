@@ -73,8 +73,10 @@
                         <x-input-label for="status" :value="__('Status')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
                         <select name="status" id="status" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
                             <option value="">Semua Status</option>
+                            <option value="menunggu" {{ request('status') == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
                             <option value="dipinjam" {{ request('status') == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
                             <option value="dikembalikan" {{ request('status') == 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
+                            <option value="ditolak" {{ request('status') == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
                         </select>
                     </div>
 
@@ -141,9 +143,17 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center border-r-2 border-gray-200 dark:border-gray-700">
-                                        @if($item->status === 'dipinjam')
+                                        @if($item->status === 'menunggu')
+                                        <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded-full text-xs font-bold uppercase tracking-wider">
+                                            Menunggu
+                                        </span>
+                                        @elseif($item->status === 'dipinjam')
                                         <span class="px-3 py-1 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 rounded-full text-xs font-bold uppercase tracking-wider">
                                             Dipinjam
+                                        </span>
+                                        @elseif($item->status === 'ditolak')
+                                        <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-bold uppercase tracking-wider">
+                                            Ditolak
                                         </span>
                                         @else
                                         <span class="px-3 py-1 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-300 rounded-full text-xs font-bold uppercase tracking-wider">
@@ -163,6 +173,14 @@
                                             </span>
                                             @endif
                                         </div>
+                                        @elseif($item->status === 'menunggu')
+                                        <span class="text-amber-500 font-medium italic">
+                                            Menunggu persetujuan admin
+                                        </span>
+                                        @elseif($item->status === 'ditolak')
+                                        <span class="text-gray-400 font-medium italic">
+                                            Permintaan ditolak
+                                        </span>
                                         @elseif($item->status === 'dipinjam')
                                         @php
                                         $dueDate = \Carbon\Carbon::parse($item->tanggal_kembali);
@@ -190,8 +208,10 @@
                                                 Kembalikan
                                             </button>
                                         </form>
+                                        @elseif($item->status === 'dikembalikan')
+                                        <span class="text-xs text-gray-400 italic font-bold uppercase">Selesai</span>
                                         @else
-                                        <span class="text-xs text-gray-400 italic">Selesai</span>
+                                        <span class="text-xs text-gray-400 italic">-</span>
                                         @endif
                                     </td>
                                 </tr>
