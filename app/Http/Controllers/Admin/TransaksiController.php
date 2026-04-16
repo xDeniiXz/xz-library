@@ -18,7 +18,7 @@ class TransaksiController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->get('search');
-            $criteria = $request->get('criteria', 'semua');
+            $criteria = $request->get('criteria', 'peminjam');
 
             $query->where(function ($q) use ($search, $criteria) {
                 if ($criteria === 'peminjam') {
@@ -106,6 +106,53 @@ class TransaksiController extends Controller
         $buku->decrement('stok');
 
         return redirect()->route('admin.transaksi.index')->with('success', 'Peminjaman berhasil dicatat.');
+    }
+
+    public function edit(Peminjaman $peminjaman)
+    {
+        $anggota = User::where('role', 'student')->get();
+        $buku = Buku::orderBy('judul', 'asc')->get();
+        return view('admin.transaksi.edit', compact('peminjaman', 'anggota', 'buku'));
+    }
+
+    public function update(Request $request, Peminjaman $peminjaman)
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'buku_id' => 'required|exists:buku,id',
+            'tanggal_pinjam' => 'required|date',
+            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
+            'status' => 'required|in:menunggu,dipinjam,dikembalikan,ditolak',
+        ]);
+
+        // Logika Stok jika Buku atau Status Berubah
+        if ($peminjaman->buku_id != $request->buku_id) {
+            // Buku diganti
+            if ($peminjaman->status === 'dipinjam') {
+                $peminjaman->buku->increment('stok');
+            }
+            if ($request->status === 'dipinjam') {
+                $newBuku = Buku::findOrFail($request->buku_id);
+                if ($newBuku->stok <= 0) {
+                    return back()->withErrors(['buku_id' => 'Stok buku baru habis.'])->withInput();
+                }
+                $newBuku->decrement('stok');
+            }
+        } else {
+            // Buku sama, cek perubahan status
+            if ($peminjaman->status !== 'dipinjam' && $request->status === 'dipinjam') {
+                if ($peminjaman->buku->stok <= 0) {
+                    return back()->withErrors(['status' => 'Stok buku habis untuk status Dipinjam.'])->withInput();
+                }
+                $peminjaman->buku->decrement('stok');
+            } elseif ($peminjaman->status === 'dipinjam' && $request->status !== 'dipinjam') {
+                $peminjaman->buku->increment('stok');
+            }
+        }
+
+        $peminjaman->update($request->all());
+
+        return redirect()->route('admin.transaksi.index')->with('success', 'Data transaksi berhasil diperbarui.');
     }
 
     public function approve(Peminjaman $peminjaman)

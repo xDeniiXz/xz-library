@@ -14,11 +14,11 @@
                     <div class="w-full md:w-48">
                         <x-input-label for="criteria" :value="__('Cari Berdasarkan')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
                         <select name="criteria" id="criteria" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
-                            <option value="semua" {{ request('criteria') == 'semua' ? 'selected' : '' }}>Semua</option>
-                            <option value="judul" {{ request('criteria') == 'judul' ? 'selected' : '' }}>Judul</option>
+                            <option value="judul" {{ request('criteria', 'judul') == 'judul' ? 'selected' : '' }}>Judul</option>
                             <option value="penulis" {{ request('criteria') == 'penulis' ? 'selected' : '' }}>Penulis</option>
                             <option value="penerbit" {{ request('criteria') == 'penerbit' ? 'selected' : '' }}>Penerbit</option>
                             <option value="tahun_terbit" {{ request('criteria') == 'tahun_terbit' ? 'selected' : '' }}>Tahun Terbit</option>
+                            <option value="semua" {{ request('criteria') == 'semua' ? 'selected' : '' }}>Semua</option>
                         </select>
                     </div>
 
@@ -48,18 +48,27 @@
                         </select>
                     </div>
 
+                    <!-- Sort Dropdown -->
+                    <div class="w-full md:w-40">
+                        <x-input-label for="sort" :value="__('Urutan')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
+                        <select name="sort" id="sort" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                            <option value="asc" {{ request('sort', 'asc') == 'asc' ? 'selected' : '' }}>Terkecil (ASC)</option>
+                            <option value="desc" {{ request('sort') == 'desc' ? 'selected' : '' }}>Terbesar (DESC)</option>
+                        </select>
+                    </div>
+
                     <!-- Buttons -->
                     <div class="flex gap-2 w-full md:w-auto">
                         <button type="submit" class="flex-1 md:flex-none px-6 py-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl transition-all duration-300 shadow-lg shadow-indigo-500/30 flex items-center justify-center">
                             Cari
                         </button>
-                        
-                        @if(request()->anyFilled(['search', 'kategori_id', 'criteria']))
-                            <a href="{{ route('student.peminjaman.katalog') }}" class="px-3 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg shadow-rose-500/20" title="Reset Filter">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </a>
+
+                        @if(request()->anyFilled(['search', 'kategori_id', 'criteria', 'sort']))
+                        <a href="{{ route('student.peminjaman.katalog') }}" class="px-3 py-2 bg-rose-500 hover:bg-rose-600 text-white font-bold rounded-xl transition-all duration-300 flex items-center justify-center shadow-lg shadow-rose-500/20" title="Reset Filter">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </a>
                         @endif
                     </div>
                 </form>
@@ -125,6 +134,9 @@
                             </p>
                             <p class="text-sm text-gray-600 dark:text-gray-400">
                                 <span class="font-semibold text-gray-500">Tahun:</span> {{ $item->tahun_terbit }}
+                            </p>
+                            <p class="text-sm text-gray-600 dark:text-gray-400">
+                                <span class="font-semibold text-gray-500">ISBN:</span> {{ $item->isbn }}
                             </p>
                         </div>
 

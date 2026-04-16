@@ -19,7 +19,7 @@ class PeminjamanController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->get('search');
-            $criteria = $request->get('criteria', 'semua');
+            $criteria = $request->get('criteria', 'judul');
 
             $query->whereHas('buku', function ($q) use ($search, $criteria) {
                 if ($criteria === 'judul') {
@@ -30,6 +30,8 @@ class PeminjamanController extends Controller
                     $q->where('penerbit', 'like', "%$search%");
                 } elseif ($criteria === 'tahun_terbit') {
                     $q->where('tahun_terbit', $search);
+                } elseif ($criteria === 'isbn') {
+                    $q->where('isbn', 'like', "%$search%");
                 } else {
                     $q->where('judul', 'like', "%$search%")
                         ->orWhere('penulis', 'like', "%$search%")
@@ -67,7 +69,7 @@ class PeminjamanController extends Controller
         // Filter by Criteria and Search
         if ($request->has('search') && $request->get('search') != '') {
             $search = $request->get('search');
-            $criteria = $request->get('criteria', 'semua');
+            $criteria = $request->get('criteria', 'judul');
 
             $query->where(function ($q) use ($search, $criteria) {
                 if ($criteria === 'judul') {
@@ -93,7 +95,12 @@ class PeminjamanController extends Controller
             $query->where('kategori_id', $request->get('kategori_id'));
         }
 
-        $buku = $query->orderBy('judul', 'asc')->get();
+        $sort = $request->get('sort', 'asc') === 'desc' ? 'desc' : 'asc';
+        $criteria = $request->get('criteria', 'judul');
+        $allowedSortColumns = ['judul', 'penulis', 'penerbit', 'tahun_terbit', 'id'];
+        $sortColumn = in_array($criteria, $allowedSortColumns) ? $criteria : 'judul';
+
+        $buku = $query->orderBy($sortColumn, $sort)->get();
         $kategori = \App\Models\Kategori::orderBy('nama_kategori', 'asc')->get();
 
         return view('student.peminjaman.katalog', compact('buku', 'kategori'));

@@ -29,8 +29,9 @@
                     <div class="w-full md:w-48">
                         <x-input-label for="criteria" :value="__('Cari Berdasarkan')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
                         <select name="criteria" id="criteria" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
+                            <option value="nama_kategori" {{ request('criteria', 'nama_kategori') == 'nama_kategori' ? 'selected' : '' }}>Nama Kategori</option>
                             <option value="id" {{ request('criteria') == 'id' ? 'selected' : '' }}>ID</option>
-                            <option value="nama_kategori" {{ request('criteria') == 'nama_kategori' ? 'selected' : '' }}>Nama Kategori</option>
+                            <option value="semua" {{ request('criteria') == 'semua' ? 'selected' : '' }}>Semua</option>
                         </select>
                     </div>
 

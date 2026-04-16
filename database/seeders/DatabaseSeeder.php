@@ -18,6 +18,8 @@ class DatabaseSeeder extends Seeder
             'email' => 'admin@gmail.com',
             'password' => bcrypt('password'),
             'role' => 'admin',
+            'address' => 'Jl. Merdeka No. 123, Jakarta Pusat',
+            'phone_number' => '081234567890',
         ]);
 
         \App\Models\User::create([
@@ -26,20 +28,13 @@ class DatabaseSeeder extends Seeder
             'email' => 'student@gmail.com',
             'password' => bcrypt('password'),
             'role' => 'student',
+            'address' => 'Jl. Pendidikan No. 45, Bandung',
+            'phone_number' => '089876543210',
         ]);
 
-        $kategori = \App\Models\Kategori::create([
-            'nama_kategori' => 'Fiksi',
-        ]);
-
-        \App\Models\Buku::create([
-            'judul' => 'Buku Contoh',
-            'penulis' => 'Nama Penulis',
-            'penerbit' => 'Nama Penerbit',
-            'tahun_terbit' => 2023,
-            'isbn' => '1234567890',
-            'stok' => 10,
-            'kategori_id' => $kategori->id,
+        $this->call([
+            KategoriSeeder::class,
+            BukuSeeder::class,
         ]);
     }
 }

@@ -29,12 +29,12 @@
                     <div class="w-full md:w-48">
                         <x-input-label for="criteria" :value="__('Cari Berdasarkan')" class="text-xs font-bold text-gray-400 uppercase mb-1 ml-1" />
                         <select name="criteria" id="criteria" class="block w-full px-3 py-2 bg-gray-50 dark:bg-gray-700 border border-gray-200 dark:border-gray-600 rounded-xl text-sm text-gray-900 dark:text-white focus:ring-2 focus:ring-indigo-500 transition-all duration-300">
-                            <option value="semua" {{ request('criteria') == 'semua' ? 'selected' : '' }}>Semua</option>
-                            <option value="judul" {{ request('criteria') == 'judul' ? 'selected' : '' }}>Judul</option>
+                            <option value="judul" {{ request('criteria', 'judul') == 'judul' ? 'selected' : '' }}>Judul</option>
                             <option value="penulis" {{ request('criteria') == 'penulis' ? 'selected' : '' }}>Penulis</option>
                             <option value="penerbit" {{ request('criteria') == 'penerbit' ? 'selected' : '' }}>Penerbit</option>
                             <option value="isbn" {{ request('criteria') == 'isbn' ? 'selected' : '' }}>ISBN</option>
                             <option value="tahun_terbit" {{ request('criteria') == 'tahun_terbit' ? 'selected' : '' }}>Tahun Terbit</option>
+                            <option value="semua" {{ request('criteria') == 'semua' ? 'selected' : '' }}>Semua</option>
                         </select>
                     </div>
 

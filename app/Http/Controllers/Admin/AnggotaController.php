@@ -19,7 +19,7 @@ class AnggotaController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->get('search');
-            $criteria = $request->get('criteria', 'semua');
+            $criteria = $request->get('criteria', 'name');
 
             $query->where(function ($q) use ($search, $criteria) {
                 if ($criteria === 'name') {

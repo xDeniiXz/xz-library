@@ -17,8 +17,16 @@ class KategoriController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->get('search');
+            $criteria = $request->get('criteria', 'nama_kategori');
 
-            $query->where('nama_kategori', 'like', "%$search%");
+            if ($criteria === 'nama_kategori') {
+                $query->where('nama_kategori', 'like', "%$search%");
+            } elseif ($criteria === 'id') {
+                $query->where('id', $search);
+            } else {
+                $query->where('nama_kategori', 'like', "%$search%")
+                    ->orWhere('id', $search);
+            }
         }
 
         if ($request->filled('filter_buku')) {

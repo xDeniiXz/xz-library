@@ -74,6 +74,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('transaksi', [TransaksiController::class, 'index'])->name('admin.transaksi.index');
     Route::get('transaksi/create', [TransaksiController::class, 'create'])->name('admin.transaksi.create');
     Route::post('transaksi', [TransaksiController::class, 'store'])->name('admin.transaksi.store');
+    Route::get('transaksi/{peminjaman}/edit', [TransaksiController::class, 'edit'])->name('admin.transaksi.edit');
+    Route::put('transaksi/{peminjaman}', [TransaksiController::class, 'update'])->name('admin.transaksi.update');
     Route::post('transaksi/{peminjaman}/approve', [TransaksiController::class, 'approve'])->name('admin.transaksi.approve');
     Route::post('transaksi/{peminjaman}/reject', [TransaksiController::class, 'reject'])->name('admin.transaksi.reject');
     Route::post('transaksi/{peminjaman}/kembalikan', [TransaksiController::class, 'kembalikan'])->name('admin.transaksi.kembalikan');

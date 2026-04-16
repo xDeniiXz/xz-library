@@ -18,7 +18,7 @@ class BukuController extends Controller
 
         if ($request->filled('search')) {
             $search = $request->get('search');
-            $criteria = $request->get('criteria', 'semua');
+            $criteria = $request->get('criteria', 'judul');
 
             $query->where(function ($q) use ($search, $criteria) {
                 if ($criteria === 'judul') {
@@ -68,7 +68,7 @@ class BukuController extends Controller
      */
     public function create()
     {
-        $kategori = Kategori::all();
+        $kategori = Kategori::orderBy('nama_kategori', 'asc')->get();
         return view('admin.buku.create', compact('kategori'));
     }
 
@@ -100,7 +100,7 @@ class BukuController extends Controller
      */
     public function edit(Buku $buku)
     {
-        $kategori = Kategori::all();
+        $kategori = Kategori::orderBy('nama_kategori', 'asc')->get();
         return view('admin.buku.edit', compact('buku', 'kategori'));
     }
 
