@@ -133,7 +133,7 @@
 
                 <p class="text-sm text-gray-600 dark:text-gray-400">
                     <a href="{{ route('login') }}" class="font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors">
-                        Login Di Sini
+                        Login di sini
                     </a>
                 </p>
 

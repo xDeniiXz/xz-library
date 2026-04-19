@@ -49,9 +49,9 @@
             </label>
 
             @if (Route::has('password.request'))
-                <a class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors" href="{{ route('password.request') }}">
-                    {{ __('Lupa password?') }}
-                </a>
+            <a class="text-sm font-semibold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 transition-colors" href="{{ route('password.request') }}">
+                {{ __('Lupa password?') }}
+            </a>
             @endif
         </div>
 
@@ -71,12 +71,12 @@
                 </div>
 
                 <p class="text-sm text-gray-600 dark:text-gray-400">
-                    Belum punya akun? 
+                    Belum punya akun?
                     <a href="{{ route('register') }}" class="font-bold text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 transition-colors">
-                        Daftar Sekarang
+                        Register disini
                     </a>
                 </p>
-                
+
                 <a href="{{ url('/') }}" class="inline-flex items-center gap-2 text-xs font-bold text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 uppercase tracking-widest transition-colors">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
