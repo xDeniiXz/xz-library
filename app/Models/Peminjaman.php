@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\PeminjamanStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
@@ -17,6 +18,10 @@ class Peminjaman extends Model
         'tanggal_pinjam',
         'tanggal_kembali',
         'status',
+    ];
+
+    protected $casts = [
+        'status' => PeminjamanStatus::class,
     ];
 
     public function user()

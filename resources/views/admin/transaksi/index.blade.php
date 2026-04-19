@@ -161,23 +161,11 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center border-r-2 border-gray-200 dark:border-gray-700">
-                                        @if($item->status === 'menunggu')
-                                        <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded-full text-xs font-bold uppercase tracking-wider">
-                                            Menunggu
-                                        </span>
-                                        @elseif($item->status === 'dipinjam')
-                                        <span class="px-3 py-1 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 rounded-full text-xs font-bold uppercase tracking-wider">
-                                            Dipinjam
-                                        </span>
-                                        @elseif($item->status === 'ditolak')
-                                        <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-bold uppercase tracking-wider">
-                                            Ditolak
-                                        </span>
-                                        @else
                                         <div class="flex flex-col items-center gap-1">
-                                            <span class="px-3 py-1 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-300 rounded-full text-xs font-bold uppercase tracking-wider">
-                                                Dikembalikan
+                                            <span class="px-3 py-1 bg-{{ $item->status->color() }}-100 dark:bg-{{ $item->status->color() }}-900/40 text-{{ $item->status->color() }}-600 dark:text-{{ $item->status->color() }}-300 rounded-full text-xs font-bold uppercase tracking-wider">
+                                                {{ $item->status->label() }}
                                             </span>
+                                            @if($item->status === \App\Enums\PeminjamanStatus::DIKEMBALIKAN && $item->pengembalian)
                                             <span class="text-[10px] text-gray-500 italic">
                                                 Tgl: {{ \Carbon\Carbon::parse($item->pengembalian->tanggal_pengembalian)->format('d M Y') }}
                                             </span>
@@ -186,12 +174,12 @@
                                                 Denda: Rp {{ number_format($item->pengembalian->denda, 0, ',', '.') }}
                                             </span>
                                             @endif
+                                            @endif
                                         </div>
-                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
                                         <div class="flex justify-center items-center gap-3">
-                                            @if($item->status === 'menunggu')
+                                            @if($item->status === \App\Enums\PeminjamanStatus::MENUNGGU)
                                             <form action="{{ route('admin.transaksi.approve', $item->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 <button type="submit" class="inline-flex items-center px-3 py-2 bg-indigo-600 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 shadow-md shadow-indigo-500/20">
@@ -206,7 +194,7 @@
                                             </form>
                                             @endif
 
-                                            @if($item->status === 'dipinjam')
+                                            @if($item->status === \App\Enums\PeminjamanStatus::DIPINJAM)
                                             <form id="return-form-{{ $item->id }}" action="{{ route('admin.transaksi.kembalikan', $item->id) }}" method="POST">
                                                 @csrf
                                                 <input type="hidden" name="tanggal_pengembalian" id="tanggal_pengembalian-{{ $item->id }}">
@@ -224,7 +212,7 @@
                                                 </button>
                                             </form>
                                             @endif
-                                            @if($item->status === 'menunggu' || $item->status === 'dipinjam')
+                                            @if($item->status === \App\Enums\PeminjamanStatus::MENUNGGU || $item->status === \App\Enums\PeminjamanStatus::DIPINJAM)
                                             <a href="{{ route('admin.transaksi.edit', $item->id) }}" class="inline-flex items-center p-2 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded-lg transition-all duration-300 shadow-sm" title="Edit Transaksi">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />

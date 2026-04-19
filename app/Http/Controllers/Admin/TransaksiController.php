@@ -7,13 +7,25 @@ use App\Models\Buku;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 use App\Models\User;
+use App\Enums\PeminjamanStatus;
+use App\Http\Requests\Admin\StoreTransaksiRequest;
+use App\Http\Requests\Admin\UpdateTransaksiRequest;
+use App\Services\LibraryService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
 use App\Exports\TransaksiExport;
 use Maatwebsite\Excel\Facades\Excel;
 
 class TransaksiController extends Controller
 {
+    protected $libraryService;
+
+    public function __construct(LibraryService $libraryService)
+    {
+        $this->libraryService = $libraryService;
+    }
+
     public function index(Request $request)
     {
         $query = Peminjaman::with(['user', 'buku', 'pengembalian']);
@@ -81,33 +93,26 @@ class TransaksiController extends Controller
         return view('admin.transaksi.create', compact('anggota', 'buku'));
     }
 
-    public function store(Request $request)
+    public function store(StoreTransaksiRequest $request)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'buku_id' => 'required|exists:buku,id',
-            'tanggal_pinjam' => 'required|date',
-            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
-        ]);
+        return DB::transaction(function () use ($request) {
+            $buku = Buku::findOrFail($request->buku_id);
+            if ($buku->stok <= 0) {
+                return back()->withErrors(['buku_id' => 'Stok buku habis.'])->withInput();
+            }
 
-        // Cek stok buku
-        $buku = Buku::findOrFail($request->buku_id);
-        if ($buku->stok <= 0) {
-            return back()->withErrors(['buku_id' => 'Stok buku habis.'])->withInput();
-        }
+            Peminjaman::create([
+                'user_id' => $request->user_id,
+                'buku_id' => $request->buku_id,
+                'tanggal_pinjam' => $request->tanggal_pinjam,
+                'tanggal_kembali' => $request->tanggal_kembali,
+                'status' => PeminjamanStatus::DIPINJAM,
+            ]);
 
-        Peminjaman::create([
-            'user_id' => $request->user_id,
-            'buku_id' => $request->buku_id,
-            'tanggal_pinjam' => $request->tanggal_pinjam,
-            'tanggal_kembali' => $request->tanggal_kembali,
-            'status' => 'dipinjam',
-        ]);
+            $buku->decrement('stok');
 
-        // Kurangi stok buku
-        $buku->decrement('stok');
-
-        return redirect()->route('admin.transaksi.index')->with('success', 'Peminjaman berhasil dicatat.');
+            return redirect()->route('admin.transaksi.index')->with('success', 'Peminjaman berhasil dicatat.');
+        });
     }
 
     public function edit(Peminjaman $peminjaman)
@@ -117,77 +122,53 @@ class TransaksiController extends Controller
         return view('admin.transaksi.edit', compact('peminjaman', 'anggota', 'buku'));
     }
 
-    public function update(Request $request, Peminjaman $peminjaman)
+    public function update(UpdateTransaksiRequest $request, Peminjaman $peminjaman)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'buku_id' => 'required|exists:buku,id',
-            'tanggal_pinjam' => 'required|date',
-            'tanggal_kembali' => 'required|date|after_or_equal:tanggal_pinjam',
-            'status' => 'required|in:menunggu,dipinjam,dikembalikan,ditolak',
-        ]);
-
-        // Logika Stok jika Buku atau Status Berubah
-        if ($peminjaman->buku_id != $request->buku_id) {
-            // Buku diganti
-            if ($peminjaman->status === 'dipinjam') {
-                $peminjaman->buku->increment('stok');
+        return DB::transaction(function () use ($request, $peminjaman) {
+            try {
+                $this->libraryService->processStockChange($peminjaman, $request->status, $request->buku_id);
+            } catch (\Exception $e) {
+                return back()->withErrors(['buku_id' => $e->getMessage()])->withInput();
             }
-            if ($request->status === 'dipinjam') {
-                $newBuku = Buku::findOrFail($request->buku_id);
-                if ($newBuku->stok <= 0) {
-                    return back()->withErrors(['buku_id' => 'Stok buku baru habis.'])->withInput();
-                }
-                $newBuku->decrement('stok');
-            }
-        } else {
-            // Buku sama, cek perubahan status
-            if ($peminjaman->status !== 'dipinjam' && $request->status === 'dipinjam') {
-                if ($peminjaman->buku->stok <= 0) {
-                    return back()->withErrors(['status' => 'Stok buku habis untuk status Dipinjam.'])->withInput();
-                }
-                $peminjaman->buku->decrement('stok');
-            } elseif ($peminjaman->status === 'dipinjam' && $request->status !== 'dipinjam') {
-                $peminjaman->buku->increment('stok');
-            }
-        }
 
-        $peminjaman->update($request->all());
+            $peminjaman->update($request->validated());
 
-        return redirect()->route('admin.transaksi.index')->with('success', 'Data transaksi berhasil diperbarui.');
+            return redirect()->route('admin.transaksi.index')->with('success', 'Data transaksi berhasil diperbarui.');
+        });
     }
 
     public function approve(Peminjaman $peminjaman)
     {
-        if ($peminjaman->status !== 'menunggu') {
+        if ($peminjaman->status !== PeminjamanStatus::MENUNGGU) {
             return back()->with('error', 'Transaksi ini tidak dapat disetujui.');
         }
 
-        // Cek stok buku lagi sebelum menyetujui
-        if ($peminjaman->buku->stok <= 0) {
-            return back()->with('error', 'Stok buku habis. Permintaan tidak dapat disetujui.');
-        }
+        return DB::transaction(function () use ($peminjaman) {
+            if ($peminjaman->buku->stok <= 0) {
+                return back()->with('error', 'Stok buku habis. Permintaan tidak dapat disetujui.');
+            }
 
-        $peminjaman->update(['status' => 'dipinjam']);
-        $peminjaman->buku->decrement('stok');
+            $peminjaman->update(['status' => PeminjamanStatus::DIPINJAM]);
+            $peminjaman->buku->decrement('stok');
 
-        return back()->with('success', 'Permintaan peminjaman berhasil disetujui.');
+            return back()->with('success', 'Permintaan peminjaman berhasil disetujui.');
+        });
     }
 
     public function reject(Peminjaman $peminjaman)
     {
-        if ($peminjaman->status !== 'menunggu') {
+        if ($peminjaman->status !== PeminjamanStatus::MENUNGGU) {
             return back()->with('error', 'Transaksi ini tidak dapat ditolak.');
         }
 
-        $peminjaman->update(['status' => 'ditolak']);
+        $peminjaman->update(['status' => PeminjamanStatus::DITOLAK]);
 
         return back()->with('success', 'Permintaan peminjaman telah ditolak.');
     }
 
     public function kembalikan(Request $request, Peminjaman $peminjaman)
     {
-        if ($peminjaman->status === 'dikembalikan') {
+        if ($peminjaman->status === PeminjamanStatus::DIKEMBALIKAN) {
             return back()->with('error', 'Buku sudah dikembalikan.');
         }
 
@@ -195,44 +176,37 @@ class TransaksiController extends Controller
             'tanggal_pengembalian' => 'required|date|after_or_equal:' . $peminjaman->tanggal_pinjam,
         ]);
 
-        $tanggal_pengembalian = Carbon::parse($request->tanggal_pengembalian);
-        $due_date = Carbon::parse($peminjaman->tanggal_kembali);
-        $denda = 0;
+        return DB::transaction(function () use ($request, $peminjaman) {
+            $denda = $this->libraryService->calculateFines($peminjaman, $request->tanggal_pengembalian);
 
-        // Hitung denda jika terlambat (10.000 per hari)
-        if ($tanggal_pengembalian->gt($due_date)) {
-            $days = $tanggal_pengembalian->diffInDays($due_date);
-            $denda = $days * 10000;
-        }
+            Pengembalian::create([
+                'peminjaman_id' => $peminjaman->id,
+                'tanggal_pengembalian' => $request->tanggal_pengembalian,
+                'denda' => $denda,
+            ]);
 
-        Pengembalian::create([
-            'peminjaman_id' => $peminjaman->id,
-            'tanggal_pengembalian' => $tanggal_pengembalian->toDateString(),
-            'denda' => $denda,
-        ]);
+            $peminjaman->update(['status' => PeminjamanStatus::DIKEMBALIKAN]);
+            $peminjaman->buku->increment('stok');
 
-        $peminjaman->update(['status' => 'dikembalikan']);
+            $pesan = 'Buku berhasil dikembalikan.';
+            if ($denda > 0) {
+                $pesan .= ' Denda keterlambatan: Rp ' . number_format($denda, 0, ',', '.');
+            }
 
-        // Kembalikan stok buku
-        $peminjaman->buku->increment('stok');
-
-        $pesan = 'Buku berhasil dikembalikan.';
-        if ($denda > 0) {
-            $pesan .= ' Denda keterlambatan: Rp ' . number_format($denda, 0, ',', '.');
-        }
-
-        return redirect()->route('admin.transaksi.index')->with('success', $pesan);
+            return redirect()->route('admin.transaksi.index')->with('success', $pesan);
+        });
     }
 
     public function destroy(Peminjaman $peminjaman)
     {
-        // Jika dihapus saat status masih dipinjam, kembalikan stok
-        if ($peminjaman->status === 'dipinjam') {
-            $peminjaman->buku->increment('stok');
-        }
+        return DB::transaction(function () use ($peminjaman) {
+            if ($peminjaman->status === PeminjamanStatus::DIPINJAM) {
+                $peminjaman->buku->increment('stok');
+            }
 
-        $peminjaman->delete();
-        return redirect()->route('admin.transaksi.index')->with('success', 'Data transaksi berhasil dihapus.');
+            $peminjaman->delete();
+            return redirect()->route('admin.transaksi.index')->with('success', 'Data transaksi berhasil dihapus.');
+        });
     }
 
     public function bulkDelete(Request $request)
@@ -242,15 +216,17 @@ class TransaksiController extends Controller
             return response()->json(['success' => false, 'message' => 'Tidak ada data yang dipilih.']);
         }
 
-        $peminjamans = Peminjaman::whereIn('id', $ids)->get();
-        foreach ($peminjamans as $peminjaman) {
-            if ($peminjaman->status === 'dipinjam') {
-                $peminjaman->buku->increment('stok');
+        return DB::transaction(function () use ($ids) {
+            $peminjamans = Peminjaman::whereIn('id', $ids)->get();
+            foreach ($peminjamans as $peminjaman) {
+                if ($peminjaman->status === PeminjamanStatus::DIPINJAM) {
+                    $peminjaman->buku->increment('stok');
+                }
+                $peminjaman->delete();
             }
-            $peminjaman->delete();
-        }
 
-        return response()->json(['success' => true, 'message' => 'Transaksi yang dipilih berhasil dihapus.']);
+            return response()->json(['success' => true, 'message' => 'Transaksi yang dipilih berhasil dihapus.']);
+        });
     }
 
     public function export(Request $request)

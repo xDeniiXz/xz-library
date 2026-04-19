@@ -18,9 +18,9 @@
                                 <x-input-label for="user_id" :value="__('Pilih Siswa')" class="font-bold mb-2" />
                                 <select id="user_id" name="user_id" class="block mt-1 w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 rounded-xl transition-all text-gray-700 dark:text-gray-300">
                                     @foreach($anggota as $item)
-                                        <option value="{{ $item->id }}" {{ old('user_id', $peminjaman->user_id) == $item->id ? 'selected' : '' }}>
-                                            {{ $item->name }} (@ {{ $item->username }})
-                                        </option>
+                                    <option value="{{ $item->id }}" {{ old('user_id', $peminjaman->user_id) == $item->id ? 'selected' : '' }}>
+                                        {{ $item->name }} (@ {{ $item->username }})
+                                    </option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('user_id')" class="mt-2" />
@@ -31,9 +31,9 @@
                                 <x-input-label for="buku_id" :value="__('Pilih Buku')" class="font-bold mb-2" />
                                 <select id="buku_id" name="buku_id" class="block mt-1 w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 rounded-xl transition-all text-gray-700 dark:text-gray-300">
                                     @foreach($buku as $item)
-                                        <option value="{{ $item->id }}" {{ old('buku_id', $peminjaman->buku_id) == $item->id ? 'selected' : '' }}>
-                                            {{ $item->judul }} (Stok: {{ $item->stok }})
-                                        </option>
+                                    <option value="{{ $item->id }}" {{ old('buku_id', $peminjaman->buku_id) == $item->id ? 'selected' : '' }}>
+                                        {{ $item->judul }} (Stok: {{ $item->stok }})
+                                    </option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('buku_id')" class="mt-2" />
@@ -57,10 +57,11 @@
                             <div>
                                 <x-input-label for="status" :value="__('Status')" class="font-bold mb-2" />
                                 <select id="status" name="status" class="block mt-1 w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 rounded-xl transition-all text-gray-700 dark:text-gray-300">
-                                    <option value="menunggu" {{ old('status', $peminjaman->status) == 'menunggu' ? 'selected' : '' }}>Menunggu</option>
-                                    <option value="dipinjam" {{ old('status', $peminjaman->status) == 'dipinjam' ? 'selected' : '' }}>Dipinjam</option>
-                                    <option value="dikembalikan" {{ old('status', $peminjaman->status) == 'dikembalikan' ? 'selected' : '' }}>Dikembalikan</option>
-                                    <option value="ditolak" {{ old('status', $peminjaman->status) == 'ditolak' ? 'selected' : '' }}>Ditolak</option>
+                                    @foreach(\App\Enums\PeminjamanStatus::cases() as $status)
+                                    <option value="{{ $status->value }}" {{ old('status', $peminjaman->status->value) == $status->value ? 'selected' : '' }}>
+                                        {{ $status->label() }}
+                                    </option>
+                                    @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('status')" class="mt-2" />
                                 <p class="mt-2 text-xs text-gray-500 italic">* Mengubah status ke/dari 'Dipinjam' akan mempengaruhi stok buku.</p>
