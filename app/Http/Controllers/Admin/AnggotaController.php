@@ -7,6 +7,9 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
+use App\Exports\AnggotaExport;
+use App\Imports\AnggotaImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class AnggotaController extends Controller
 {
@@ -63,7 +66,7 @@ class AnggotaController extends Controller
         $allowedSortColumns = ['name', 'username', 'email', 'phone_number', 'address', 'id'];
         $sortColumn = in_array($criteria, $allowedSortColumns) ? $criteria : 'id';
 
-        $anggota = $query->orderBy($sortColumn, $sort)->get();
+        $anggota = $query->orderBy($sortColumn, $sort)->paginate(10)->appends(request()->query());
         return view('admin.anggota.index', compact('anggota'));
     }
 
@@ -174,5 +177,28 @@ class AnggotaController extends Controller
         User::whereIn('id', $ids)->where('role', 'student')->delete();
 
         return response()->json(['success' => true, 'message' => 'Siswa yang dipilih berhasil dihapus.']);
+    }
+
+    public function export(Request $request)
+    {
+        $ids = $request->input('ids');
+        if ($ids && is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        return Excel::download(new AnggotaExport($ids), 'data_anggota_' . date('Ymd_His') . '.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            Excel::import(new AnggotaImport, $request->file('file'));
+            return back()->with('success', 'Data anggota berhasil diimpor.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
+        }
     }
 }

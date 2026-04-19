@@ -9,6 +9,8 @@ use App\Models\Pengembalian;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
+use App\Exports\TransaksiExport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class TransaksiController extends Controller
 {
@@ -53,22 +55,22 @@ class TransaksiController extends Controller
 
         // Sorting logic for relations
         if ($criteria === 'peminjam') {
-            $query->select('peminjaman.*')
+            $query = $query->select('peminjaman.*')
                 ->join('users', 'peminjaman.user_id', '=', 'users.id')
                 ->orderBy('users.name', $sort);
         } elseif ($criteria === 'username') {
-            $query->select('peminjaman.*')
+            $query = $query->select('peminjaman.*')
                 ->join('users', 'peminjaman.user_id', '=', 'users.id')
                 ->orderBy('users.username', $sort);
         } elseif ($criteria === 'buku') {
-            $query->select('peminjaman.*')
+            $query = $query->select('peminjaman.*')
                 ->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
                 ->orderBy('buku.judul', $sort);
         } else {
-            $query->orderBy('peminjaman.id', $sort);
+            $query = $query->orderBy('peminjaman.id', $sort);
         }
 
-        $transaksi = $query->get();
+        $transaksi = $query->paginate(10)->appends(request()->query());
         return view('admin.transaksi.index', compact('transaksi'));
     }
 
@@ -249,5 +251,14 @@ class TransaksiController extends Controller
         }
 
         return response()->json(['success' => true, 'message' => 'Transaksi yang dipilih berhasil dihapus.']);
+    }
+
+    public function export(Request $request)
+    {
+        $ids = $request->input('ids');
+        if ($ids && is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        return Excel::download(new TransaksiExport($ids), 'data_transaksi_' . date('Ymd_His') . '.xlsx');
     }
 }

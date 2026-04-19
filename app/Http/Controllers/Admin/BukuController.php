@@ -6,6 +6,9 @@ use App\Http\Controllers\Controller;
 use App\Models\Buku;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
+use App\Exports\BukuExport;
+use App\Imports\BukuImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class BukuController extends Controller
 {
@@ -57,7 +60,7 @@ class BukuController extends Controller
         $allowedSortColumns = ['judul', 'penulis', 'penerbit', 'isbn', 'tahun_terbit', 'id'];
         $sortColumn = in_array($criteria, $allowedSortColumns) ? $criteria : 'id';
 
-        $buku = $query->orderBy($sortColumn, $sort)->get();
+        $buku = $query->orderBy($sortColumn, $sort)->paginate(10)->appends(request()->query());
         $kategori = Kategori::orderBy('nama_kategori', 'asc')->get();
 
         return view('admin.buku.index', compact('buku', 'kategori'));
@@ -147,5 +150,28 @@ class BukuController extends Controller
         Buku::whereIn('id', $ids)->delete();
 
         return response()->json(['success' => true, 'message' => 'Buku yang dipilih berhasil dihapus.']);
+    }
+
+    public function export(Request $request)
+    {
+        $ids = $request->input('ids');
+        if ($ids && is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        return Excel::download(new BukuExport($ids), 'data_buku_' . date('Ymd_His') . '.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            Excel::import(new BukuImport, $request->file('file'));
+            return back()->with('success', 'Data buku berhasil diimpor.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
+        }
     }
 }

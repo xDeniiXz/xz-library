@@ -167,6 +167,10 @@
                 </div>
                 @endforelse
             </div>
+
+            <div class="mt-12 px-2">
+                {{ $buku->links() }}
+            </div>
         </div>
     </div>
 

@@ -39,6 +39,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('admin.dashboard');
 
     Route::delete('kategori/bulk-delete', [KategoriController::class, 'bulkDelete'])->name('admin.kategori.bulkDelete');
+    Route::get('kategori/export', [KategoriController::class, 'export'])->name('admin.kategori.export');
+    Route::post('kategori/import', [KategoriController::class, 'import'])->name('admin.kategori.import');
     Route::resource('kategori', KategoriController::class)->names([
         'index' => 'admin.kategori.index',
         'create' => 'admin.kategori.create',
@@ -49,6 +51,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     ]);
 
     Route::delete('buku/bulk-delete', [BukuController::class, 'bulkDelete'])->name('admin.buku.bulkDelete');
+    Route::get('buku/export', [BukuController::class, 'export'])->name('admin.buku.export');
+    Route::post('buku/import', [BukuController::class, 'import'])->name('admin.buku.import');
     Route::resource('buku', BukuController::class)->names([
         'index' => 'admin.buku.index',
         'create' => 'admin.buku.create',
@@ -59,6 +63,8 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
     ]);
 
     Route::delete('anggota/bulk-delete', [AnggotaController::class, 'bulkDelete'])->name('admin.anggota.bulkDelete');
+    Route::get('anggota/export', [AnggotaController::class, 'export'])->name('admin.anggota.export');
+    Route::post('anggota/import', [AnggotaController::class, 'import'])->name('admin.anggota.import');
     Route::resource('anggota', AnggotaController::class)->parameters([
         'anggota' => 'anggota'
     ])->names([
@@ -69,8 +75,9 @@ Route::middleware(['auth', 'role:admin'])->prefix('admin')->group(function () {
         'update' => 'admin.anggota.update',
         'destroy' => 'admin.anggota.destroy',
     ]);
-
+    // Transaksi
     Route::delete('transaksi/bulk-delete', [TransaksiController::class, 'bulkDelete'])->name('admin.transaksi.bulkDelete');
+    Route::get('transaksi/export', [TransaksiController::class, 'export'])->name('admin.transaksi.export');
     Route::get('transaksi', [TransaksiController::class, 'index'])->name('admin.transaksi.index');
     Route::get('transaksi/create', [TransaksiController::class, 'create'])->name('admin.transaksi.create');
     Route::post('transaksi', [TransaksiController::class, 'store'])->name('admin.transaksi.store');

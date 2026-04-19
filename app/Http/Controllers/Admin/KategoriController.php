@@ -5,6 +5,9 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
+use App\Exports\KategoriExport;
+use App\Imports\KategoriImport;
+use Maatwebsite\Excel\Facades\Excel;
 
 class KategoriController extends Controller
 {
@@ -41,7 +44,7 @@ class KategoriController extends Controller
         $criteria = $request->get('criteria', 'id');
         $sortColumn = in_array($criteria, ['nama_kategori', 'id']) ? $criteria : 'id';
 
-        $kategori = $query->orderBy($sortColumn, $sort)->get();
+        $kategori = $query->orderBy($sortColumn, $sort)->paginate(10)->appends(request()->query());
         return view('admin.kategori.index', compact('kategori'));
     }
 
@@ -109,5 +112,28 @@ class KategoriController extends Controller
         Kategori::whereIn('id', $ids)->delete();
 
         return response()->json(['success' => true, 'message' => 'Kategori yang dipilih berhasil dihapus.']);
+    }
+
+    public function export(Request $request)
+    {
+        $ids = $request->input('ids');
+        if ($ids && is_string($ids)) {
+            $ids = explode(',', $ids);
+        }
+        return Excel::download(new KategoriExport($ids), 'data_kategori_' . date('Ymd_His') . '.xlsx');
+    }
+
+    public function import(Request $request)
+    {
+        $request->validate([
+            'file' => 'required|mimes:xlsx,xls,csv',
+        ]);
+
+        try {
+            Excel::import(new KategoriImport, $request->file('file'));
+            return back()->with('success', 'Data kategori berhasil diimpor.');
+        } catch (\Exception $e) {
+            return back()->with('error', 'Terjadi kesalahan saat mengimpor data: ' . $e->getMessage());
+        }
     }
 }

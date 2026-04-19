@@ -51,14 +51,14 @@ class PeminjamanController extends Controller
         $allowedBukuSort = ['judul', 'penulis', 'penerbit', 'tahun_terbit'];
 
         if (in_array($criteria, $allowedBukuSort)) {
-            $query->select('peminjaman.*')
+            $query = $query->select('peminjaman.*')
                 ->join('buku', 'peminjaman.buku_id', '=', 'buku.id')
                 ->orderBy('buku.' . $criteria, $sort);
         } else {
-            $query->orderBy('peminjaman.id', $sort);
+            $query = $query->orderBy('peminjaman.id', $sort);
         }
 
-        $peminjaman = $query->get();
+        $peminjaman = $query->paginate(10)->appends(request()->query());
         return view('student.peminjaman.index', compact('peminjaman'));
     }
 
@@ -100,7 +100,7 @@ class PeminjamanController extends Controller
         $allowedSortColumns = ['judul', 'penulis', 'penerbit', 'tahun_terbit', 'id'];
         $sortColumn = in_array($criteria, $allowedSortColumns) ? $criteria : 'judul';
 
-        $buku = $query->orderBy($sortColumn, $sort)->get();
+        $buku = $query->orderBy($sortColumn, $sort)->paginate(10)->appends(request()->query());
         $kategori = \App\Models\Kategori::orderBy('nama_kategori', 'asc')->get();
 
         return view('student.peminjaman.katalog', compact('buku', 'kategori'));

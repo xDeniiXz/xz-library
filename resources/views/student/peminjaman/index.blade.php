@@ -133,7 +133,7 @@
                             <tbody class="bg-white dark:bg-gray-800 divide-y-2 divide-gray-200 dark:divide-gray-700">
                                 @forelse($peminjaman as $item)
                                 <tr class="hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-indigo-600 dark:text-indigo-400 border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">{{ $loop->iteration }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-indigo-600 dark:text-indigo-400 border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">{{ ($peminjaman->currentPage() - 1) * $peminjaman->perPage() + $loop->iteration }}</td>
                                     <td class="px-6 py-4 border-r-2 border-gray-200 dark:border-gray-700">
                                         <div class="flex flex-col">
                                             <span class="text-sm font-bold text-gray-900 dark:text-white uppercase">{{ $item->buku->judul }}</span>
@@ -239,6 +239,10 @@
                                 @endforelse
                             </tbody>
                         </table>
+                    </div>
+
+                    <div class="mt-8 px-2">
+                        {{ $peminjaman->links() }}
                     </div>
                 </div>
             </div>

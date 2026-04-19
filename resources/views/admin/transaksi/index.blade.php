@@ -89,13 +89,27 @@
                         <h3 class="text-xl font-extrabold tracking-tight text-indigo-600 dark:text-indigo-400 uppercase">
                             Riwayat Peminjaman & Pengembalian
                         </h3>
-                        <div class="flex items-center gap-3">
+                        <div class="flex flex-wrap items-center gap-3">
                             <button id="bulk-delete-btn" style="display: none;" onclick="bulkDelete()" class="inline-flex items-center px-4 py-2.5 bg-rose-600 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-rose-700 active:bg-rose-900 focus:outline-none focus:ring-2 focus:ring-rose-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-300 shadow-lg shadow-rose-500/30">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                                 </svg>
                                 Hapus Terpilih (<span id="selected-count">0</span>)
                             </button>
+
+                            <!-- Export Button -->
+                            <div class="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                                <button onclick="exportExcel()" class="inline-flex items-center px-3 py-1.5 text-xs font-bold text-gray-700 dark:text-gray-200 uppercase hover:bg-white dark:hover:bg-gray-600 rounded-md transition-all duration-300">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1.5 text-emerald-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                    </svg>
+                                    Export
+                                </button>
+                                <form id="export-form" action="{{ route('admin.transaksi.export') }}" method="GET" class="hidden">
+                                    <input type="hidden" name="ids" id="export-ids">
+                                </form>
+                            </div>
+
                             <a href="{{ route('admin.transaksi.create') }}" class="inline-flex items-center px-6 py-2.5 bg-indigo-600 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 active:bg-indigo-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:focus:ring-offset-gray-800 transition-all duration-300 shadow-lg shadow-indigo-500/30">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
@@ -126,7 +140,7 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-center border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
                                         <input type="checkbox" name="ids[]" value="{{ $item->id }}" class="transaction-checkbox rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800 cursor-pointer">
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-indigo-600 dark:text-indigo-400 border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">{{ $loop->iteration }}</td>
+                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-indigo-600 dark:text-indigo-400 border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">{{ ($transaksi->currentPage() - 1) * $transaksi->perPage() + $loop->iteration }}</td>
                                     <td class="px-6 py-4 border-r-2 border-gray-200 dark:border-gray-700">
                                         <div class="flex flex-col">
                                             <span class="text-sm font-bold text-gray-900 dark:text-white uppercase">{{ $item->user->name }}</span>
@@ -251,6 +265,10 @@
                             </tbody>
                         </table>
                     </div>
+
+                    <div class="mt-8 px-2">
+                        {{ $transaksi->links() }}
+                    </div>
                 </div>
             </div>
         </div>
@@ -290,6 +308,18 @@
                 });
                 updateBulkDeleteButton();
             });
+        }
+
+        function exportExcel() {
+            const selectedIds = Array.from(document.querySelectorAll('.transaction-checkbox:checked'))
+                .map(cb => cb.value);
+
+            if (selectedIds.length > 0) {
+                document.getElementById('export-ids').value = selectedIds.join(',');
+            } else {
+                document.getElementById('export-ids').value = '';
+            }
+            document.getElementById('export-form').submit();
         }
 
         checkboxes.forEach(checkbox => {
