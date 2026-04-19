@@ -17,8 +17,9 @@
                         background: '#1f2937',
                         color: '#ffffff',
                         iconColor: '#6366f1',
-                        showConfirmButton: false,
-                        timer: 2000
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#6366f1'
                     });
                 });
             </script>

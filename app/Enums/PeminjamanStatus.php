@@ -6,6 +6,7 @@ enum PeminjamanStatus: string
 {
     case MENUNGGU = 'menunggu';
     case DIPINJAM = 'dipinjam';
+    case MENUNGGU_PENGEMBALIAN = 'menunggu_pengembalian';
     case DIKEMBALIKAN = 'dikembalikan';
     case DITOLAK = 'ditolak';
 
@@ -14,6 +15,7 @@ enum PeminjamanStatus: string
         return match ($this) {
             self::MENUNGGU => 'Menunggu Persetujuan',
             self::DIPINJAM => 'Sedang Dipinjam',
+            self::MENUNGGU_PENGEMBALIAN => 'Menunggu Konfirmasi Kembali',
             self::DIKEMBALIKAN => 'Sudah Dikembalikan',
             self::DITOLAK => 'Permintaan Ditolak',
         };
@@ -23,9 +25,10 @@ enum PeminjamanStatus: string
     {
         return match ($this) {
             self::MENUNGGU => 'amber',
-            self::DIPINJAM => 'rose',
+            self::DIPINJAM => 'blue',
+            self::MENUNGGU_PENGEMBALIAN => 'indigo',
             self::DIKEMBALIKAN => 'green',
-            self::DITOLAK => 'gray',
+            self::DITOLAK => 'rose',
         };
     }
 }

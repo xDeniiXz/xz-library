@@ -6,7 +6,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+        <div class="max-w-[95rem] mx-auto sm:px-6 lg:px-8">
             @if(session('success'))
             <script>
                 document.addEventListener('DOMContentLoaded', function() {
@@ -17,8 +17,9 @@
                         background: '#1f2937',
                         color: '#ffffff',
                         iconColor: '#6366f1',
-                        showConfirmButton: false,
-                        timer: 3000
+                        showConfirmButton: true,
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#6366f1'
                     });
                 });
             </script>
@@ -123,34 +124,34 @@
                         <table class="min-w-full divide-y-2 divide-gray-200 dark:divide-gray-700">
                             <thead class="bg-gray-100 dark:bg-gray-700/50">
                                 <tr>
-                                    <th class="px-6 py-4 text-center border-r-2 border-gray-200 dark:border-gray-700 w-12">
+                                    <th class="px-4 py-4 text-center border-r-2 border-gray-200 dark:border-gray-700 w-12">
                                         <input type="checkbox" id="select-all" class="rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800 cursor-pointer">
                                     </th>
-                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700 w-16">No</th>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700">Peminjam</th>
-                                    <th class="px-6 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700">Buku</th>
-                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700">Tgl Pinjam / Kembali</th>
-                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700">Status</th>
-                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider w-48">Aksi</th>
+                                    <th class="px-4 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700 w-16">No</th>
+                                    <th class="px-4 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700">Peminjam</th>
+                                    <th class="px-4 py-4 text-left text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700">Buku</th>
+                                    <th class="px-4 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700">Tgl Pinjam / Kembali</th>
+                                    <th class="px-4 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider border-r-2 border-gray-200 dark:border-gray-700">Status</th>
+                                    <th class="px-4 py-4 text-center text-sm font-bold text-gray-700 dark:text-gray-200 uppercase tracking-wider w-48">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody class="bg-white dark:bg-gray-800 divide-y-2 divide-gray-200 dark:divide-gray-700">
                                 @forelse($transaksi as $item)
                                 <tr class="hover:bg-indigo-50 dark:hover:bg-indigo-900/20 transition-all duration-200">
-                                    <td class="px-6 py-4 whitespace-nowrap text-center border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
+                                    <td class="px-4 py-4 whitespace-nowrap text-center border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
                                         <input type="checkbox" name="ids[]" value="{{ $item->id }}" class="transaction-checkbox rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800 cursor-pointer">
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-indigo-600 dark:text-indigo-400 border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">{{ ($transaksi->currentPage() - 1) * $transaksi->perPage() + $loop->iteration }}</td>
-                                    <td class="px-6 py-4 border-r-2 border-gray-200 dark:border-gray-700">
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-center font-bold text-indigo-600 dark:text-indigo-400 border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">{{ ($transaksi->currentPage() - 1) * $transaksi->perPage() + $loop->iteration }}</td>
+                                    <td class="px-4 py-4 border-r-2 border-gray-200 dark:border-gray-700">
                                         <div class="flex flex-col">
                                             <span class="text-sm font-bold text-gray-900 dark:text-white uppercase">{{ $item->user->name }}</span>
                                             <span class="text-xs text-gray-500 dark:text-gray-400 italic">@ {{ $item->user->username }}</span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 border-r-2 border-gray-200 dark:border-gray-700">
+                                    <td class="px-4 py-4 border-r-2 border-gray-200 dark:border-gray-700">
                                         <span class="text-sm font-medium text-gray-900 dark:text-white uppercase">{{ $item->buku->judul }}</span>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-xs border-r-2 border-gray-200 dark:border-gray-700">
+                                    <td class="px-4 py-4 whitespace-nowrap text-xs border-r-2 border-gray-200 dark:border-gray-700">
                                         <div class="flex flex-col gap-1 text-center">
                                             <span class="bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-300 px-2 py-1 rounded font-bold">
                                                 {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d M Y') }}
@@ -160,11 +161,19 @@
                                             </span>
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-center border-r-2 border-gray-200 dark:border-gray-700">
+                                    <td class="px-4 py-4 whitespace-nowrap text-center border-r-2 border-gray-200 dark:border-gray-700">
                                         <div class="flex flex-col items-center gap-1">
                                             <span class="px-3 py-1 bg-{{ $item->status->color() }}-100 dark:bg-{{ $item->status->color() }}-900/40 text-{{ $item->status->color() }}-600 dark:text-{{ $item->status->color() }}-300 rounded-full text-xs font-bold uppercase tracking-wider">
                                                 {{ $item->status->label() }}
                                             </span>
+                                            @if($item->status === \App\Enums\PeminjamanStatus::MENUNGGU_PENGEMBALIAN)
+                                            <span class="text-indigo-600 dark:text-indigo-400 font-black text-[10px] uppercase tracking-tight">
+                                                Konfirmasi Fisik
+                                            </span>
+                                            <div class="px-2 py-0.5 rounded-md {{ $item->estimasi_denda > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' }} font-bold text-[10px] border border-current/20">
+                                                Denda: Rp {{ number_format($item->estimasi_denda, 0, ',', '.') }}
+                                            </div>
+                                            @endif
                                             @if($item->status === \App\Enums\PeminjamanStatus::DIKEMBALIKAN && $item->pengembalian)
                                             <span class="text-[10px] text-gray-500 italic">
                                                 Tgl: {{ \Carbon\Carbon::parse($item->pengembalian->tanggal_pengembalian)->format('d M Y') }}
@@ -177,21 +186,26 @@
                                             @endif
                                         </div>
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center">
+                                    <td class="px-4 py-4 whitespace-nowrap text-sm text-center">
                                         <div class="flex justify-center items-center gap-3">
-                                            @if($item->status === \App\Enums\PeminjamanStatus::MENUNGGU)
+                                            @if($item->status === \App\Enums\PeminjamanStatus::MENUNGGU || $item->status === \App\Enums\PeminjamanStatus::MENUNGGU_PENGEMBALIAN)
                                             <form action="{{ route('admin.transaksi.approve', $item->id) }}" method="POST" class="inline">
                                                 @csrf
                                                 <button type="submit" class="inline-flex items-center px-3 py-2 bg-indigo-600 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 transition-all duration-300 shadow-md shadow-indigo-500/20">
-                                                    Setujui
+                                                    {{ $item->status === \App\Enums\PeminjamanStatus::MENUNGGU_PENGEMBALIAN ? 'Konfirmasi' : 'Setujui' }}
                                                 </button>
                                             </form>
-                                            <form action="{{ route('admin.transaksi.reject', $item->id) }}" method="POST" class="inline">
+                                            @if($item->status === \App\Enums\PeminjamanStatus::MENUNGGU)
+                                            <form id="reject-form-{{ $item->id }}" action="{{ route('admin.transaksi.reject', $item->id) }}" method="POST" class="inline">
                                                 @csrf
-                                                <button type="submit" class="inline-flex items-center px-3 py-2 bg-amber-500 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-300 shadow-md shadow-amber-500/20">
+                                                <input type="hidden" name="catatan" id="catatan-{{ $item->id }}">
+                                                <button type="button"
+                                                    onclick="confirmReject('{{ $item->id }}', '{{ $item->user->name }}', '{{ $item->buku->judul }}')"
+                                                    class="inline-flex items-center px-3 py-2 bg-amber-500 border border-transparent rounded-lg font-bold text-xs text-white uppercase tracking-widest hover:bg-amber-600 focus:outline-none focus:ring-2 focus:ring-amber-500 transition-all duration-300 shadow-md shadow-amber-500/20">
                                                     Tolak
                                                 </button>
                                             </form>
+                                            @endif
                                             @endif
 
                                             @if($item->status === \App\Enums\PeminjamanStatus::DIPINJAM)
@@ -212,7 +226,7 @@
                                                 </button>
                                             </form>
                                             @endif
-                                            @if($item->status === \App\Enums\PeminjamanStatus::MENUNGGU || $item->status === \App\Enums\PeminjamanStatus::DIPINJAM)
+                                            @if($item->status === \App\Enums\PeminjamanStatus::MENUNGGU || $item->status === \App\Enums\PeminjamanStatus::DIPINJAM || $item->status === \App\Enums\PeminjamanStatus::MENUNGGU_PENGEMBALIAN || $item->status === \App\Enums\PeminjamanStatus::DIKEMBALIKAN)
                                             <a href="{{ route('admin.transaksi.edit', $item->id) }}" class="inline-flex items-center p-2 bg-amber-100 hover:bg-amber-200 text-amber-600 rounded-lg transition-all duration-300 shadow-sm" title="Edit Transaksi">
                                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -426,6 +440,45 @@
                 if (result.isConfirmed) {
                     document.getElementById('tanggal_pengembalian-' + id).value = result.value;
                     document.getElementById('return-form-' + id).submit();
+                }
+            })
+        }
+
+        function confirmReject(id, borrowerName, bookTitle) {
+            Swal.fire({
+                title: 'Alasan Penolakan',
+                html: `
+                    <div class="text-left space-y-3">
+                        <p class="text-sm">Peminjam: <b class="text-indigo-400">${borrowerName}</b></p>
+                        <p class="text-sm">Buku: <b class="text-indigo-400">${bookTitle}</b></p>
+                        <hr class="border-gray-600 my-3">
+                        <label for="swal-input-reason" class="block text-sm font-medium text-gray-300 mb-1">Masukkan Alasan Penolakan:</label>
+                        <textarea id="swal-input-reason" class="w-full px-3 py-2 bg-gray-700 border border-gray-600 rounded-lg text-white focus:ring-indigo-500 focus:border-indigo-500 min-h-[100px]" placeholder="Contoh: Stok buku fisik rusak atau hilang..."></textarea>
+                    </div>
+                `,
+                icon: 'warning',
+                background: '#1f2937',
+                color: '#ffffff',
+                showCancelButton: true,
+                confirmButtonColor: '#e11d48',
+                cancelButtonColor: '#4b5563',
+                confirmButtonText: 'Ya, Tolak Pinjaman',
+                cancelButtonText: 'Batal',
+                reverseButtons: true,
+                customClass: {
+                    popup: 'rounded-2xl border-2 border-rose-500/30 shadow-2xl shadow-rose-500/20'
+                },
+                preConfirm: () => {
+                    const reason = document.getElementById('swal-input-reason').value;
+                    if (!reason) {
+                        Swal.showValidationMessage('Alasan penolakan wajib diisi');
+                    }
+                    return reason;
+                }
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    document.getElementById('catatan-' + id).value = result.value;
+                    document.getElementById('reject-form-' + id).submit();
                 }
             })
         }

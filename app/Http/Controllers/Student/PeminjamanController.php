@@ -6,12 +6,23 @@ use App\Http\Controllers\Controller;
 use App\Models\Buku;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
+use App\Enums\PeminjamanStatus;
+use App\Http\Requests\Admin\StoreTransaksiRequest;
+use App\Http\Requests\Admin\UpdateTransaksiRequest;
+use App\Services\LibraryService;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
 
 class PeminjamanController extends Controller
 {
+    protected $libraryService;
+
+    public function __construct(LibraryService $libraryService)
+    {
+        $this->libraryService = $libraryService;
+    }
+
     public function index(Request $request)
     {
         $query = Peminjaman::with(['buku', 'pengembalian'])
@@ -42,7 +53,7 @@ class PeminjamanController extends Controller
         }
 
         if ($request->filled('status')) {
-            $query->where('status', $request->get('status'));
+            $query->where('peminjaman.status', $request->get('status'));
         }
 
         $sort = $request->get('sort', 'asc') === 'desc' ? 'desc' : 'asc';
@@ -113,6 +124,10 @@ class PeminjamanController extends Controller
             'tanggal_kembali' => 'required|date|after:today',
         ]);
 
+        if (!$this->libraryService->canBorrow(Auth::id())) {
+            return back()->with('error', 'Anda sudah mencapai batas maksimal peminjaman (3 buku). Silakan kembalikan buku terlebih dahulu.');
+        }
+
         $buku = Buku::findOrFail($request->buku_id);
 
         if ($buku->stok <= 0) {
@@ -122,12 +137,14 @@ class PeminjamanController extends Controller
         // Cek apakah siswa masih meminjam buku ini atau sudah ada request yang sedang menunggu
         $cekPinjam = Peminjaman::where('user_id', Auth::id())
             ->where('buku_id', $request->buku_id)
-            ->whereIn('status', ['dipinjam', 'menunggu'])
+            ->whereIn('status', [PeminjamanStatus::DIPINJAM, PeminjamanStatus::MENUNGGU, PeminjamanStatus::MENUNGGU_PENGEMBALIAN])
             ->first();
 
         if ($cekPinjam) {
-            if ($cekPinjam->status === 'dipinjam') {
+            if ($cekPinjam->status === PeminjamanStatus::DIPINJAM) {
                 return back()->with('error', 'Anda masih meminjam buku ini.');
+            } elseif ($cekPinjam->status === PeminjamanStatus::MENUNGGU_PENGEMBALIAN) {
+                return back()->with('error', 'Buku ini sedang dalam proses pengembalian.');
             } else {
                 return back()->with('error', 'Permintaan peminjaman buku ini sudah dikirim dan sedang menunggu persetujuan admin.');
             }
@@ -138,10 +155,10 @@ class PeminjamanController extends Controller
             'buku_id' => $request->buku_id,
             'tanggal_pinjam' => Carbon::now()->toDateString(),
             'tanggal_kembali' => $request->tanggal_kembali,
-            'status' => 'menunggu',
+            'status' => PeminjamanStatus::MENUNGGU,
         ]);
 
-        return redirect()->route('student.peminjaman.index')->with('success', 'Permintaan peminjaman berhasil dikirim. Menunggu persetujuan admin.');
+        return back()->with('success', 'Permintaan peminjaman berhasil dikirim. Menunggu persetujuan admin.');
     }
 
     public function kembalikan(Request $request, Peminjaman $peminjaman)
@@ -151,39 +168,27 @@ class PeminjamanController extends Controller
             abort(403);
         }
 
-        if ($peminjaman->status === 'dikembalikan') {
+        if ($peminjaman->status === PeminjamanStatus::DIKEMBALIKAN) {
             return back()->with('error', 'Buku sudah dikembalikan.');
         }
 
-        if ($peminjaman->status !== 'dipinjam') {
+        if ($peminjaman->status === PeminjamanStatus::MENUNGGU_PENGEMBALIAN) {
+            return back()->with('error', 'Permintaan pengembalian sedang menunggu persetujuan admin.');
+        }
+
+        if ($peminjaman->status !== PeminjamanStatus::DIPINJAM) {
             return back()->with('error', 'Buku belum disetujui untuk dipinjam atau status tidak valid.');
         }
 
-        $tanggal_pengembalian = Carbon::now();
-        $due_date = Carbon::parse($peminjaman->tanggal_kembali);
-        $denda = 0;
+        $estimasi_denda = $this->libraryService->calculateFines($peminjaman, Carbon::now()->toDateString());
 
-        // Hitung denda jika terlambat (10.000 per hari)
-        if ($tanggal_pengembalian->gt($due_date)) {
-            $days = $tanggal_pengembalian->diffInDays($due_date);
-            $denda = $days * 10000;
-        }
-
-        Pengembalian::create([
-            'peminjaman_id' => $peminjaman->id,
-            'tanggal_pengembalian' => $tanggal_pengembalian->toDateString(),
-            'denda' => $denda,
+        $peminjaman->update([
+            'status' => PeminjamanStatus::MENUNGGU_PENGEMBALIAN,
+            'estimasi_denda' => $estimasi_denda,
         ]);
 
-        $peminjaman->update(['status' => 'dikembalikan']);
-
-        // Kembalikan stok buku
-        $peminjaman->buku->increment('stok');
-
-        $pesan = 'Buku berhasil dikembalikan.';
-        if ($denda > 0) {
-            $pesan .= ' Denda keterlambatan: Rp ' . number_format($denda, 0, ',', '.');
-        }
+        $pesan = 'Permintaan pengembalian telah dikirim. Silakan serahkan buku ke perpustakaan untuk konfirmasi.';
+        $pesan .= ' Estimasi denda saat ini: Rp ' . number_format($estimasi_denda, 0, ',', '.');
 
         return redirect()->route('student.peminjaman.index')->with('success', $pesan);
     }

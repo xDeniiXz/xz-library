@@ -118,15 +118,9 @@
                                             {{ \Carbon\Carbon::parse($item->tanggal_pinjam)->format('d M Y') }}
                                         </td>
                                         <td class="px-6 py-4">
-                                            @if($item->status === 'menunggu')
-                                            <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded-full text-[10px] font-bold uppercase">Menunggu</span>
-                                            @elseif($item->status === 'dipinjam')
-                                            <span class="px-3 py-1 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 rounded-full text-[10px] font-bold uppercase">Dipinjam</span>
-                                            @elseif($item->status === 'ditolak')
-                                            <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-[10px] font-bold uppercase">Ditolak</span>
-                                            @else
-                                            <span class="px-3 py-1 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-300 rounded-full text-[10px] font-bold uppercase">Kembali</span>
-                                            @endif
+                                            <span class="px-3 py-1 bg-{{ $item->status->color() }}-100 dark:bg-{{ $item->status->color() }}-900/40 text-{{ $item->status->color() }}-600 dark:text-{{ $item->status->color() }}-300 rounded-full text-[10px] font-bold uppercase">
+                                                {{ $item->status->label() }}
+                                            </span>
                                         </td>
                                     </tr>
                                     @empty

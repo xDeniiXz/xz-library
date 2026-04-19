@@ -23,6 +23,19 @@ class LibraryService
         return 0;
     }
 
+    public function canBorrow(int $userId): bool
+    {
+        $activeLoansCount = Peminjaman::where('user_id', $userId)
+            ->whereIn('status', [
+                PeminjamanStatus::DIPINJAM,
+                PeminjamanStatus::MENUNGGU,
+                PeminjamanStatus::MENUNGGU_PENGEMBALIAN
+            ])
+            ->count();
+
+        return $activeLoansCount < 3;
+    }
+
     public function processStockChange(Peminjaman $peminjaman, string $newStatus, ?int $newBukuId = null): void
     {
         $currentStatus = $peminjaman->status;

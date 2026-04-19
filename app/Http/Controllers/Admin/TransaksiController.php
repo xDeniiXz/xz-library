@@ -8,6 +8,7 @@ use App\Models\Peminjaman;
 use App\Models\Pengembalian;
 use App\Models\User;
 use App\Enums\PeminjamanStatus;
+use App\Enums\UserRole;
 use App\Http\Requests\Admin\StoreTransaksiRequest;
 use App\Http\Requests\Admin\UpdateTransaksiRequest;
 use App\Services\LibraryService;
@@ -88,7 +89,7 @@ class TransaksiController extends Controller
 
     public function create()
     {
-        $anggota = User::where('role', 'student')->get();
+        $anggota = User::where('role', UserRole::STUDENT)->get();
         $buku = Buku::where('stok', '>', 0)->get();
         return view('admin.transaksi.create', compact('anggota', 'buku'));
     }
@@ -117,7 +118,7 @@ class TransaksiController extends Controller
 
     public function edit(Peminjaman $peminjaman)
     {
-        $anggota = User::where('role', 'student')->get();
+        $anggota = User::where('role', UserRole::STUDENT)->get();
         $buku = Buku::orderBy('judul', 'asc')->get();
         return view('admin.transaksi.edit', compact('peminjaman', 'anggota', 'buku'));
     }
@@ -139,6 +140,10 @@ class TransaksiController extends Controller
 
     public function approve(Peminjaman $peminjaman)
     {
+        if ($peminjaman->status === PeminjamanStatus::MENUNGGU_PENGEMBALIAN) {
+            return $this->approveReturn($peminjaman);
+        }
+
         if ($peminjaman->status !== PeminjamanStatus::MENUNGGU) {
             return back()->with('error', 'Transaksi ini tidak dapat disetujui.');
         }
@@ -155,15 +160,46 @@ class TransaksiController extends Controller
         });
     }
 
-    public function reject(Peminjaman $peminjaman)
+    private function approveReturn(Peminjaman $peminjaman)
+    {
+        return DB::transaction(function () use ($peminjaman) {
+            $tanggal_pengembalian = Carbon::now();
+            $denda = $this->libraryService->calculateFines($peminjaman, $tanggal_pengembalian->toDateString());
+
+            Pengembalian::create([
+                'peminjaman_id' => $peminjaman->id,
+                'tanggal_pengembalian' => $tanggal_pengembalian->toDateString(),
+                'denda' => $denda,
+            ]);
+
+            $peminjaman->update(['status' => PeminjamanStatus::DIKEMBALIKAN]);
+            $peminjaman->buku->increment('stok');
+
+            $pesan = 'Pengembalian buku berhasil disetujui.';
+            if ($denda > 0) {
+                $pesan .= ' Denda keterlambatan: Rp ' . number_format($denda, 0, ',', '.');
+            }
+
+            return back()->with('success', $pesan);
+        });
+    }
+
+    public function reject(Request $request, Peminjaman $peminjaman)
     {
         if ($peminjaman->status !== PeminjamanStatus::MENUNGGU) {
             return back()->with('error', 'Transaksi ini tidak dapat ditolak.');
         }
 
-        $peminjaman->update(['status' => PeminjamanStatus::DITOLAK]);
+        $request->validate([
+            'catatan' => 'required|string|max:255',
+        ]);
 
-        return back()->with('success', 'Permintaan peminjaman telah ditolak.');
+        $peminjaman->update([
+            'status' => PeminjamanStatus::DITOLAK,
+            'catatan' => $request->catatan,
+        ]);
+
+        return back()->with('success', 'Permintaan peminjaman telah ditolak dengan alasan: ' . $request->catatan);
     }
 
     public function kembalikan(Request $request, Peminjaman $peminjaman)

@@ -6,6 +6,8 @@ use App\Models\Buku;
 use App\Models\User;
 use App\Models\Peminjaman;
 use App\Models\Pengembalian;
+use App\Enums\PeminjamanStatus;
+use App\Enums\UserRole;
 use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 
@@ -27,17 +29,17 @@ class DashboardController extends Controller
     {
         $stats = [
             'total_buku' => Buku::count(),
-            'total_siswa' => User::where('role', 'student')->count(),
-            'sedang_dipinjam' => Peminjaman::where('status', 'dipinjam')->count(),
-            'permintaan_menunggu' => Peminjaman::where('status', 'menunggu')->count(),
-            'terlambat' => Peminjaman::where('status', 'dipinjam')
+            'total_siswa' => User::where('role', UserRole::STUDENT)->count(),
+            'sedang_dipinjam' => Peminjaman::where('status', PeminjamanStatus::DIPINJAM)->count(),
+            'permintaan_menunggu' => Peminjaman::whereIn('status', [PeminjamanStatus::MENUNGGU, PeminjamanStatus::MENUNGGU_PENGEMBALIAN])->count(),
+            'terlambat' => Peminjaman::where('status', PeminjamanStatus::DIPINJAM)
                 ->where('tanggal_kembali', '<', Carbon::today())
                 ->count(),
             'total_denda' => Pengembalian::sum('denda'),
         ];
 
         $transaksi_terbaru = Peminjaman::with(['user', 'buku'])
-            ->orderBy('id', 'asc')
+            ->orderBy('id', 'desc')
             ->take(5)
             ->get();
 
@@ -50,24 +52,24 @@ class DashboardController extends Controller
 
         $stats = [
             'buku_dipinjam' => Peminjaman::where('user_id', $user_id)
-                ->where('status', 'dipinjam')
+                ->where('status', PeminjamanStatus::DIPINJAM)
                 ->count(),
             'permintaan_menunggu' => Peminjaman::where('user_id', $user_id)
-                ->where('status', 'menunggu')
+                ->whereIn('status', [PeminjamanStatus::MENUNGGU, PeminjamanStatus::MENUNGGU_PENGEMBALIAN])
                 ->count(),
             'total_pinjam' => Peminjaman::where('user_id', $user_id)->count(),
             'total_denda' => Pengembalian::whereHas('peminjaman', function ($q) use ($user_id) {
                 $q->where('user_id', $user_id);
             })->sum('denda'),
             'jatuh_tempo' => Peminjaman::where('user_id', $user_id)
-                ->where('status', 'dipinjam')
+                ->where('status', PeminjamanStatus::DIPINJAM)
                 ->orderBy('tanggal_kembali', 'asc')
                 ->first(),
         ];
 
         $riwayat_terbaru = Peminjaman::with(['buku', 'pengembalian'])
             ->where('user_id', $user_id)
-            ->orderBy('id', 'asc')
+            ->orderBy('id', 'desc')
             ->take(5)
             ->get();
 

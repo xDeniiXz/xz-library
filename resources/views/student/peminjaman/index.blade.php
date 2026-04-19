@@ -151,26 +151,12 @@
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center border-r-2 border-gray-200 dark:border-gray-700">
-                                        @if($item->status === 'menunggu')
-                                        <span class="px-3 py-1 bg-amber-100 dark:bg-amber-900/40 text-amber-600 dark:text-amber-300 rounded-full text-xs font-bold uppercase tracking-wider">
-                                            Menunggu
+                                        <span class="px-3 py-1 bg-{{ $item->status->color() }}-100 dark:bg-{{ $item->status->color() }}-900/40 text-{{ $item->status->color() }}-600 dark:text-{{ $item->status->color() }}-300 rounded-full text-xs font-bold uppercase tracking-wider">
+                                            {{ $item->status->label() }}
                                         </span>
-                                        @elseif($item->status === 'dipinjam')
-                                        <span class="px-3 py-1 bg-rose-100 dark:bg-rose-900/40 text-rose-600 dark:text-rose-300 rounded-full text-xs font-bold uppercase tracking-wider">
-                                            Dipinjam
-                                        </span>
-                                        @elseif($item->status === 'ditolak')
-                                        <span class="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-600 dark:text-gray-400 rounded-full text-xs font-bold uppercase tracking-wider">
-                                            Ditolak
-                                        </span>
-                                        @else
-                                        <span class="px-3 py-1 bg-green-100 dark:bg-green-900/40 text-green-600 dark:text-green-300 rounded-full text-xs font-bold uppercase tracking-wider">
-                                            Dikembalikan
-                                        </span>
-                                        @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-xs text-center border-r-2 border-gray-200 dark:border-gray-700">
-                                        @if($item->status === 'dikembalikan' && $item->pengembalian)
+                                        @if($item->status === \App\Enums\PeminjamanStatus::DIKEMBALIKAN && $item->pengembalian)
                                         <div class="flex flex-col items-center gap-1">
                                             <span class="text-gray-500 dark:text-gray-400 italic">
                                                 Tgl Kembali: {{ \Carbon\Carbon::parse($item->pengembalian->tanggal_pengembalian)->format('d M Y') }}
@@ -181,15 +167,34 @@
                                             </span>
                                             @endif
                                         </div>
-                                        @elseif($item->status === 'menunggu')
+                                        @elseif($item->status === \App\Enums\PeminjamanStatus::MENUNGGU_PENGEMBALIAN)
+                                        <div class="flex flex-col items-center gap-1.5 py-1">
+                                            <span class="text-indigo-600 dark:text-indigo-400 font-black text-xs uppercase tracking-tight">
+                                                Pengembalian Fisik
+                                            </span>
+                                            <div class="px-2 py-0.5 rounded-md {{ $item->estimasi_denda > 0 ? 'bg-rose-100 text-rose-700' : 'bg-emerald-100 text-emerald-700' }} font-bold text-[11px] border border-current/20">
+                                                Denda: Rp {{ number_format($item->estimasi_denda, 0, ',', '.') }}
+                                            </div>
+                                            <span class="text-[10px] text-gray-400 italic">
+                                                Menunggu verifikasi admin
+                                            </span>
+                                        </div>
+                                        @elseif($item->status === \App\Enums\PeminjamanStatus::MENUNGGU)
                                         <span class="text-amber-500 font-medium italic">
                                             Menunggu persetujuan admin
                                         </span>
-                                        @elseif($item->status === 'ditolak')
-                                        <span class="text-gray-400 font-medium italic">
-                                            Permintaan ditolak
-                                        </span>
-                                        @elseif($item->status === 'dipinjam')
+                                        @elseif($item->status === \App\Enums\PeminjamanStatus::DITOLAK)
+                                        <div class="flex flex-col items-center gap-1">
+                                            <span class="text-rose-500 font-bold italic">
+                                                Permintaan ditolak
+                                            </span>
+                                            @if($item->catatan)
+                                            <span class="text-[10px] text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-0.5 rounded-md max-w-[150px] truncate" title="{{ $item->catatan }}">
+                                                Alasan: {{ $item->catatan }}
+                                            </span>
+                                            @endif
+                                        </div>
+                                        @elseif($item->status === \App\Enums\PeminjamanStatus::DIPINJAM)
                                         @php
                                         $dueDate = \Carbon\Carbon::parse($item->tanggal_kembali);
                                         $today = \Carbon\Carbon::today();
@@ -207,7 +212,7 @@
                                             @endif
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-center">
-                                        @if($item->status === 'dipinjam')
+                                        @if($item->status === \App\Enums\PeminjamanStatus::DIPINJAM)
                                         <form id="return-form-{{ $item->id }}" action="{{ route('student.peminjaman.kembalikan', $item->id) }}" method="POST" class="inline">
                                             @csrf
                                             <button type="button"
@@ -216,7 +221,7 @@
                                                 Kembalikan
                                             </button>
                                         </form>
-                                        @elseif($item->status === 'dikembalikan')
+                                        @elseif($item->status === \App\Enums\PeminjamanStatus::DIKEMBALIKAN)
                                         <span class="text-xs text-gray-400 italic font-bold uppercase">Selesai</span>
                                         @else
                                         <span class="text-xs text-gray-400 italic">-</span>

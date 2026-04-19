@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use App\Enums\UserRole;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules;
@@ -18,7 +19,7 @@ class AnggotaController extends Controller
      */
     public function index(Request $request)
     {
-        $query = User::where('role', 'student');
+        $query = User::where('role', UserRole::STUDENT);
 
         if ($request->filled('search')) {
             $search = $request->get('search');
@@ -99,7 +100,7 @@ class AnggotaController extends Controller
             'password' => Hash::make($request->password),
             'address' => $request->address,
             'phone_number' => $request->phone_number,
-            'role' => 'student',
+            'role' => UserRole::STUDENT,
         ]);
 
         return redirect()->route('admin.anggota.index')->with('success', 'Siswa berhasil ditambahkan.');
@@ -110,7 +111,7 @@ class AnggotaController extends Controller
      */
     public function edit(User $anggota)
     {
-        if ($anggota->role !== 'student') {
+        if ($anggota->role !== UserRole::STUDENT) {
             abort(403, 'Anda hanya dapat mengedit data siswa.');
         }
         return view('admin.anggota.edit', compact('anggota'));
@@ -121,7 +122,7 @@ class AnggotaController extends Controller
      */
     public function update(Request $request, User $anggota)
     {
-        if ($anggota->role !== 'student') {
+        if ($anggota->role !== UserRole::STUDENT) {
             abort(403);
         }
 
@@ -158,7 +159,7 @@ class AnggotaController extends Controller
      */
     public function destroy(User $anggota)
     {
-        if ($anggota->role !== 'student') {
+        if ($anggota->role !== UserRole::STUDENT) {
             abort(403);
         }
 
@@ -174,7 +175,7 @@ class AnggotaController extends Controller
             return response()->json(['success' => false, 'message' => 'Tidak ada data yang dipilih.']);
         }
 
-        User::whereIn('id', $ids)->where('role', 'student')->delete();
+        User::whereIn('id', $ids)->where('role', UserRole::STUDENT)->delete();
 
         return response()->json(['success' => true, 'message' => 'Siswa yang dipilih berhasil dihapus.']);
     }
