@@ -134,6 +134,22 @@ class TransaksiController extends Controller
 
             $peminjaman->update($request->validated());
 
+            // Handle Pengembalian record if status is DIKEMBALIKAN
+            if ($request->status === PeminjamanStatus::DIKEMBALIKAN->value) {
+                $denda = $this->libraryService->calculateFines($peminjaman, $request->tanggal_pengembalian);
+
+                Pengembalian::updateOrCreate(
+                    ['peminjaman_id' => $peminjaman->id],
+                    [
+                        'tanggal_pengembalian' => $request->tanggal_pengembalian,
+                        'denda' => $denda,
+                    ]
+                );
+            } elseif ($peminjaman->pengembalian) {
+                // If status changed FROM DIKEMBALIKAN to something else, remove the pengembalian record
+                $peminjaman->pengembalian->delete();
+            }
+
             return redirect()->route('admin.transaksi.index')->with('success', 'Data transaksi berhasil diperbarui.');
         });
     }

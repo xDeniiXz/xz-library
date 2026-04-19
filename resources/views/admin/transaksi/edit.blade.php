@@ -66,6 +66,21 @@
                                 <x-input-error :messages="$errors->get('status')" class="mt-2" />
                                 <p class="mt-2 text-xs text-gray-500 italic">* Mengubah status ke/dari 'Dipinjam' akan mempengaruhi stok buku.</p>
                             </div>
+
+                            <!-- Tanggal Pengembalian (Hanya muncul jika status dikembalikan) -->
+                            <div id="tanggal_pengembalian_container" class="{{ old('status', $peminjaman->status->value) == \App\Enums\PeminjamanStatus::DIKEMBALIKAN->value ? '' : 'hidden' }}">
+                                <x-input-label for="tanggal_pengembalian" :value="__('Tanggal Pengembalian Real')" class="font-bold mb-2" />
+                                <x-text-input id="tanggal_pengembalian" class="block mt-1 w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 rounded-xl transition-all" type="date" name="tanggal_pengembalian" :value="old('tanggal_pengembalian', $peminjaman->pengembalian?->tanggal_pengembalian)" />
+                                <x-input-error :messages="$errors->get('tanggal_pengembalian')" class="mt-2" />
+                                <p class="mt-2 text-xs text-gray-500 italic">* Denda akan dihitung otomatis jika tanggal pengembalian melewati batas waktu.</p>
+                            </div>
+
+                            <!-- Catatan Penolakan -->
+                            <div id="catatan_container" class="{{ old('status', $peminjaman->status->value) == \App\Enums\PeminjamanStatus::DITOLAK->value ? '' : 'hidden' }}">
+                                <x-input-label for="catatan" :value="__('Alasan Penolakan')" class="font-bold mb-2" />
+                                <textarea id="catatan" name="catatan" class="block mt-1 w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 rounded-xl transition-all text-gray-700 dark:text-gray-300" rows="3">{{ old('catatan', $peminjaman->catatan) }}</textarea>
+                                <x-input-error :messages="$errors->get('catatan')" class="mt-2" />
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end gap-4 border-t border-gray-100 dark:border-gray-700 pt-6">
@@ -81,4 +96,37 @@
             </div>
         </div>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusSelect = document.getElementById('status');
+            const catatanContainer = document.getElementById('catatan_container');
+            const catatanTextarea = document.getElementById('catatan');
+            const tanggalPengembalianContainer = document.getElementById('tanggal_pengembalian_container');
+            const tanggalPengembalianInput = document.getElementById('tanggal_pengembalian');
+
+            function toggleFields() {
+                // Toggle Catatan
+                if (statusSelect.value === '{{ \App\Enums\PeminjamanStatus::DITOLAK->value }}') {
+                    catatanContainer.classList.remove('hidden');
+                    catatanTextarea.setAttribute('required', 'required');
+                } else {
+                    catatanContainer.classList.add('hidden');
+                    catatanTextarea.removeAttribute('required');
+                }
+
+                // Toggle Tanggal Pengembalian
+                if (statusSelect.value === '{{ \App\Enums\PeminjamanStatus::DIKEMBALIKAN->value }}') {
+                    tanggalPengembalianContainer.classList.remove('hidden');
+                    tanggalPengembalianInput.setAttribute('required', 'required');
+                } else {
+                    tanggalPengembalianContainer.classList.add('hidden');
+                    tanggalPengembalianInput.removeAttribute('required');
+                }
+            }
+
+            statusSelect.addEventListener('change', toggleFields);
+            toggleFields(); // Initial check
+        });
+    </script>
 </x-app-layout>
