@@ -9,7 +9,7 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg border-2 border-indigo-500/20">
                 <div class="p-8 text-gray-900 dark:text-gray-100">
-                    <form action="{{ route('admin.buku.update', $buku->id) }}" method="POST">
+                    <form action="{{ route('admin.buku.update', $buku->id) }}" method="POST" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
@@ -25,9 +25,9 @@
                                 <x-input-label for="kategori_id" :value="__('Kategori')" class="font-bold mb-2" />
                                 <select id="kategori_id" name="kategori_id" class="block mt-1 w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 rounded-xl transition-all text-gray-700 dark:text-gray-300">
                                     @foreach($kategori as $item)
-                                        <option value="{{ $item->id }}" {{ old('kategori_id', $buku->kategori_id) == $item->id ? 'selected' : '' }}>
-                                            {{ $item->nama_kategori }}
-                                        </option>
+                                    <option value="{{ $item->id }}" {{ old('kategori_id', $buku->kategori_id) == $item->id ? 'selected' : '' }}>
+                                        {{ $item->nama_kategori }}
+                                    </option>
                                     @endforeach
                                 </select>
                                 <x-input-error :messages="$errors->get('kategori_id')" class="mt-2" />
@@ -67,6 +67,35 @@
                                 <x-text-input id="stok" class="block mt-1 w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 rounded-xl transition-all" type="number" name="stok" :value="old('stok', $buku->stok)" required min="0" />
                                 <x-input-error :messages="$errors->get('stok')" class="mt-2" />
                             </div>
+
+                            <!-- Cover Buku -->
+                            <div>
+                                <x-input-label for="cover" :value="__('Cover Buku')" class="font-bold mb-2" />
+                                <div class="mt-1 flex flex-col items-center p-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl hover:border-indigo-500 transition-colors group cursor-pointer relative">
+                                    <input type="file" name="cover" id="cover" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="previewImage(this)">
+
+                                    <div id="preview-container" class="{{ $buku->cover ? 'flex' : 'hidden' }} flex-col items-center w-full">
+                                        <img id="preview-img" src="{{ $buku->cover ? asset('storage/' . $buku->cover) : '#' }}" alt="Preview" class="max-h-48 rounded-lg shadow-md mb-2">
+                                        <span class="text-xs text-indigo-500 font-bold uppercase">Ganti Gambar</span>
+                                    </div>
+
+                                    <div id="placeholder-container" class="{{ $buku->cover ? 'hidden' : '' }} flex flex-col items-center">
+                                        <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 group-hover:text-indigo-500 transition-colors" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <p class="mt-2 text-sm text-gray-500 dark:text-gray-400 group-hover:text-indigo-500 transition-colors">Klik atau seret gambar ke sini</p>
+                                        <p class="text-xs text-gray-400 dark:text-gray-500 mt-1">PNG, JPG, WEBP (Maks. 2MB)</p>
+                                    </div>
+                                </div>
+                                <x-input-error :messages="$errors->get('cover')" class="mt-2" />
+                            </div>
+
+                            <!-- Sinopsis -->
+                            <div class="md:col-span-2">
+                                <x-input-label for="sinopsis" :value="__('Sinopsis')" class="font-bold mb-2" />
+                                <textarea id="sinopsis" name="sinopsis" rows="4" class="block mt-1 w-full bg-gray-50 dark:bg-gray-900 border-2 border-gray-200 dark:border-gray-700 focus:border-indigo-500 rounded-xl transition-all text-gray-700 dark:text-gray-300 placeholder-gray-400" placeholder="Tuliskan ringkasan atau sinopsis buku di sini...">{{ old('sinopsis', $buku->sinopsis) }}</textarea>
+                                <x-input-error :messages="$errors->get('sinopsis')" class="mt-2" />
+                            </div>
                         </div>
 
                         <div class="flex items-center justify-end gap-4 border-t border-gray-100 dark:border-gray-700 pt-6">
@@ -82,4 +111,25 @@
             </div>
         </div>
     </div>
+
+    <script>
+        function previewImage(input) {
+            const previewContainer = document.getElementById('preview-container');
+            const placeholderContainer = document.getElementById('placeholder-container');
+            const previewImg = document.getElementById('preview-img');
+
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+
+                reader.onload = function(e) {
+                    previewImg.src = e.target.result;
+                    previewContainer.classList.remove('hidden');
+                    previewContainer.classList.add('flex');
+                    placeholderContainer.classList.add('hidden');
+                }
+
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
 </x-app-layout>

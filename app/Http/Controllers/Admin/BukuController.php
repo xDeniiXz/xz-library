@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Buku;
 use App\Models\Kategori;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Exports\BukuExport;
 use App\Imports\BukuImport;
 use Maatwebsite\Excel\Facades\Excel;
@@ -87,13 +88,24 @@ class BukuController extends Controller
             'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
             'isbn' => 'required|string|max:20|unique:buku,isbn',
             'stok' => 'required|integer|min:0',
+            'sinopsis' => 'nullable|string',
+            'cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'kategori_id' => 'required|exists:kategori,id',
         ], [
             'judul.unique' => 'Judul buku sudah terdaftar dalam sistem.',
             'isbn.unique' => 'ISBN buku sudah terdaftar dalam sistem.',
+            'cover.image' => 'File harus berupa gambar.',
+            'cover.mimes' => 'Format gambar harus jpeg, png, jpg, atau webp.',
+            'cover.max' => 'Ukuran gambar maksimal 2MB.',
         ]);
 
-        Buku::create($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('cover')) {
+            $data['cover'] = $request->file('cover')->store('buku/cover', 'public');
+        }
+
+        Buku::create($data);
 
         return redirect()->route('admin.buku.index')->with('success', 'Buku berhasil ditambahkan.');
     }
@@ -119,13 +131,28 @@ class BukuController extends Controller
             'tahun_terbit' => 'required|integer|min:1900|max:' . date('Y'),
             'isbn' => 'required|string|max:20|unique:buku,isbn,' . $buku->id,
             'stok' => 'required|integer|min:0',
+            'sinopsis' => 'nullable|string',
+            'cover' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'kategori_id' => 'required|exists:kategori,id',
         ], [
             'judul.unique' => 'Judul buku sudah terdaftar dalam sistem.',
             'isbn.unique' => 'ISBN buku sudah terdaftar dalam sistem.',
+            'cover.image' => 'File harus berupa gambar.',
+            'cover.mimes' => 'Format gambar harus jpeg, png, jpg, atau webp.',
+            'cover.max' => 'Ukuran gambar maksimal 2MB.',
         ]);
 
-        $buku->update($request->all());
+        $data = $request->all();
+
+        if ($request->hasFile('cover')) {
+            // Hapus cover lama jika ada
+            if ($buku->cover) {
+                Storage::disk('public')->delete($buku->cover);
+            }
+            $data['cover'] = $request->file('cover')->store('buku/cover', 'public');
+        }
+
+        $buku->update($data);
 
         return redirect()->route('admin.buku.index')->with('success', 'Buku berhasil diperbarui.');
     }
@@ -135,6 +162,9 @@ class BukuController extends Controller
      */
     public function destroy(Buku $buku)
     {
+        if ($buku->cover) {
+            Storage::disk('public')->delete($buku->cover);
+        }
         $buku->delete();
 
         return redirect()->route('admin.buku.index')->with('success', 'Buku berhasil dihapus.');
@@ -147,7 +177,13 @@ class BukuController extends Controller
             return response()->json(['success' => false, 'message' => 'Tidak ada data yang dipilih.']);
         }
 
-        Buku::whereIn('id', $ids)->delete();
+        $buku = Buku::whereIn('id', $ids)->get();
+        foreach ($buku as $item) {
+            if ($item->cover) {
+                Storage::disk('public')->delete($item->cover);
+            }
+            $item->delete();
+        }
 
         return response()->json(['success' => true, 'message' => 'Buku yang dipilih berhasil dihapus.']);
     }

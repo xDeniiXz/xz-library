@@ -163,16 +163,34 @@
                                     <td class="px-6 py-4 whitespace-nowrap text-center border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">
                                         <input type="checkbox" name="ids[]" value="{{ $item->id }}" class="book-checkbox rounded dark:bg-gray-900 border-gray-300 dark:border-gray-700 text-indigo-600 shadow-sm focus:ring-indigo-500 dark:focus:ring-indigo-600 dark:focus:ring-offset-gray-800 cursor-pointer">
                                     </td>
-                                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold text-indigo-600 dark:text-indigo-400 border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">{{ ($buku->currentPage() - 1) * $buku->perPage() + $loop->iteration }}</td>
+                                    <td class="px-6 py-4 border-r-2 border-gray-200 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/20">{{ ($buku->currentPage() - 1) * $buku->perPage() + $loop->iteration }}</td>
                                     <td class="px-6 py-4 border-r-2 border-gray-200 dark:border-gray-700">
-                                        <div class="flex flex-col">
-                                            <span class="text-sm font-bold text-gray-900 dark:text-white uppercase">{{ $item->judul }}</span>
-                                            <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
-                                                <span class="text-xs text-gray-500 dark:text-gray-400"><b class="text-indigo-500">Penulis:</b> {{ $item->penulis }}</span>
-                                                <span class="text-xs text-gray-500 dark:text-gray-400"><b class="text-indigo-500">Penerbit:</b> {{ $item->penerbit }}</span>
-                                                <span class="text-xs text-gray-500 dark:text-gray-400"><b class="text-indigo-500">Tahun:</b> {{ $item->tahun_terbit }}</span>
+                                        <div class="flex items-start gap-4">
+                                            @if($item->cover)
+                                            <div class="flex-shrink-0 w-16 h-20 overflow-hidden rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+                                                <img src="{{ asset('storage/' . $item->cover) }}" alt="{{ $item->judul }}" class="w-full h-full object-cover">
                                             </div>
-                                            <span class="text-xs text-gray-400 dark:text-gray-500 italic mt-1">ISBN: {{ $item->isbn }}</span>
+                                            @else
+                                            <div class="flex-shrink-0 w-16 h-20 overflow-hidden rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
+                                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                                </svg>
+                                            </div>
+                                            @endif
+                                            <div class="flex flex-col">
+                                                <span class="text-sm font-bold text-gray-900 dark:text-white uppercase">{{ $item->judul }}</span>
+                                                <div class="flex flex-wrap gap-x-4 gap-y-1 mt-1">
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400"><b class="text-indigo-500">Penulis:</b> {{ $item->penulis }}</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400"><b class="text-indigo-500">Penerbit:</b> {{ $item->penerbit }}</span>
+                                                    <span class="text-xs text-gray-500 dark:text-gray-400"><b class="text-indigo-500">Tahun:</b> {{ $item->tahun_terbit }}</span>
+                                                </div>
+                                                <span class="text-xs text-gray-400 dark:text-gray-500 italic mt-1">ISBN: {{ $item->isbn }}</span>
+                                                @if($item->sinopsis)
+                                                <p class="text-xs text-gray-500 dark:text-gray-400 mt-2 line-clamp-2 italic" title="{{ $item->sinopsis }}">
+                                                    <b class="text-indigo-500">Sinopsis:</b> {{ $item->sinopsis }}
+                                                </p>
+                                                @endif
+                                            </div>
                                         </div>
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm border-r-2 border-gray-200 dark:border-gray-700">

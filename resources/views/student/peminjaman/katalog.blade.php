@@ -130,6 +130,23 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
                 @forelse($buku as $item)
                 <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-lg rounded-2xl border border-gray-200 dark:border-gray-700 hover:border-indigo-500 transition-all duration-300 group">
+                    <!-- Cover Image Section -->
+                    <div class="relative aspect-[3/4] overflow-hidden bg-gray-100 dark:bg-gray-700">
+                        @if($item->cover)
+                        <img src="{{ asset('storage/' . $item->cover) }}" alt="{{ $item->judul }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110">
+                        @else
+                        <div class="w-full h-full flex flex-col items-center justify-center text-gray-400">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-16 w-16 mb-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <span class="text-xs font-bold uppercase">No Cover</span>
+                        </div>
+                        @endif
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-end p-4">
+                            <span class="text-white text-xs font-bold uppercase tracking-wider">Detail Buku</span>
+                        </div>
+                    </div>
+
                     <div class="p-6">
                         <div class="flex justify-between items-start mb-4">
                             <span class="px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 rounded-full text-xs font-bold uppercase">
@@ -158,6 +175,14 @@
                                 <span class="font-semibold text-gray-500">ISBN:</span> {{ $item->isbn }}
                             </p>
                         </div>
+
+                        @if($item->sinopsis)
+                        <div class="mb-6">
+                            <p class="text-xs text-gray-500 dark:text-gray-400 line-clamp-3 italic leading-relaxed" title="{{ $item->sinopsis }}">
+                                <span class="font-bold text-indigo-500 not-italic">Sinopsis:</span> {{ $item->sinopsis }}
+                            </p>
+                        </div>
+                        @endif
 
                         @if($item->stok > 0)
                         <button type="button"
